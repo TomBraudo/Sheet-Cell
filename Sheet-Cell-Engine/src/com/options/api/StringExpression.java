@@ -1,4 +1,6 @@
-public class StringExpression extends Expression {
+package com.options.api;
+
+class StringExpression extends Expression {
     private final String functionName;
     private final Object[] arguments;
 
@@ -69,7 +71,4 @@ public class StringExpression extends Expression {
         // Convert to integer and return
         return (int) value;
     }
-
-
-
 }

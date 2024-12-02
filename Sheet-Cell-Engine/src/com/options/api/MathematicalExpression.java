@@ -1,4 +1,6 @@
-public class MathematicalExpression extends Expression {
+package com.options.api;
+
+class MathematicalExpression extends Expression {
     private final String functionName;
     private final Object[] arguments;
     public MathematicalExpression(String functionName, Object... arguments) {
@@ -12,7 +14,6 @@ public class MathematicalExpression extends Expression {
         for (int i = 0; i < arguments.length; i++) {
             values[i] = parseObject(arguments[i]);
         }
-
         switch (functionName) {
             case "PLUS":
                 validateNumOfArguments(functionName, arguments.length, 2);
