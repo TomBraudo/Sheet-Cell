@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project version="4">
-  <component name="ProjectModuleManager">
-    <modules>
-      <module fileurl="file://$PROJECT_DIR$/Sheet-Cell-Engine/Sheet-Cell-Engine.iml" filepath="$PROJECT_DIR$/Sheet-Cell-Engine/Sheet-Cell-Engine.iml" />
-      <module fileurl="file://$PROJECT_DIR$/Sheet-Cell-UI-Interface/Sheet-Cell-UI-Interface.iml" filepath="$PROJECT_DIR$/Sheet-Cell-UI-Interface/Sheet-Cell-UI-Interface.iml" />
-    </modules>
-  </component>
-</project>

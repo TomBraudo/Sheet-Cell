@@ -11,6 +11,6 @@
     <artifactId>Sheet-Cell-Engine</artifactId>
 
     <dependencies>
-        <!-- Add dependencies for your engine logic, e.g., commons-math, etc. -->
+        <!-- Add dependencies required by the engine -->
     </dependencies>
 </project>
