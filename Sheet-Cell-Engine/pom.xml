@@ -11,6 +11,6 @@
     <artifactId>Sheet-Cell-Engine</artifactId>
 
     <dependencies>
-        <!-- Add dependencies required by the engine -->
+        <!-- Add dependencies specific to the engine module -->
     </dependencies>
 </project>

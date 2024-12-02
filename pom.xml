@@ -11,8 +11,4 @@
         <module>Sheet-Cell-Engine</module>
         <module>Sheet-Cell-UI-Interface</module>
     </modules>
-
-    <properties>
-        <java.version>11</java.version> <!-- Change as needed -->
-    </properties>
 </project>

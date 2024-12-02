@@ -1,14 +1,19 @@
 package com.options.api;
 
-class ExpressionParser {
+import java.util.ArrayList;
+import java.util.List;
+
+public class ExpressionParser {
     public static Expression parseExpression(String input) {
+        // Ensure the input starts and ends with curly braces
         if (!input.startsWith("{") || !input.endsWith("}")) {
             throw new IllegalArgumentException("Expression must be enclosed in curly braces: " + input);
         }
 
-        // Remove outer braces and split into function name and arguments
+        // Remove the outer braces and split into function name and arguments
         String content = input.substring(1, input.length() - 1);
         String[] parts = content.split(",", 2);
+
         if (parts.length < 1) {
             throw new IllegalArgumentException("Expression is missing a function name: " + input);
         }
@@ -16,22 +21,17 @@ class ExpressionParser {
         String functionName = parts[0].trim();
         String argumentsString = parts.length > 1 ? parts[1] : "";
 
-        // Get function type
+        // Get the function type from the registry
         FunctionType functionType = FunctionRegistry.getFunctionType(functionName);
 
-        // Parse arguments
+        // Parse the arguments
         List<Object> arguments = parseArguments(argumentsString);
 
-        // Validate arguments based on function type
+        // Validate the arguments for the specific function type
         validateArguments(functionType, arguments);
 
-        // Create an expression that uses the function handler
-        return new Expression() {
-            @Override
-            public Object evaluate() {
-                return FunctionRegistry.getFunctionHandler(functionType).execute(arguments.toArray());
-            }
-        };
+        // Create and return the unified Expression object
+        return new Expression(functionName, arguments.toArray());
     }
 
     private static void validateArguments(FunctionType type, List<Object> arguments) {
@@ -51,6 +51,11 @@ class ExpressionParser {
                     throw new IllegalArgumentException("SUB requires exactly 3 arguments.");
                 }
                 break;
+            case REF:
+                if (arguments.size() != 1) {
+                    throw new IllegalArgumentException("REF requires exactly 1 argument.");
+                }
+                break;
             default:
                 throw new IllegalArgumentException("Unsupported function type: " + type);
         }
@@ -63,15 +68,18 @@ class ExpressionParser {
 
         for (char ch : argumentsString.toCharArray()) {
             if (ch == ',' && braceLevel == 0) {
+                // Argument separator: process the current argument
                 arguments.add(parseArgument(currentArg.toString().trim()));
-                currentArg.setLength(0);
+                currentArg.setLength(0); // Clear the buffer
             } else {
+                // Adjust brace level and append the character
                 if (ch == '{') braceLevel++;
                 if (ch == '}') braceLevel--;
                 currentArg.append(ch);
             }
         }
 
+        // Add the last argument if it exists
         if (currentArg.length() > 0) {
             arguments.add(parseArgument(currentArg.toString().trim()));
         }
@@ -81,13 +89,19 @@ class ExpressionParser {
 
     private static Object parseArgument(String arg) {
         if (arg.startsWith("{") && arg.endsWith("}")) {
-            return parseExpression(arg);
+            return parseExpression(arg); // Nested expression
         }
+
+        if (arg.matches("[A-Z]+\\d+")) {
+            return arg; // Letter-row, number-column format
+        }
+
         try {
-            return Double.parseDouble(arg);
+            return Double.parseDouble(arg); // Numeric argument
         } catch (NumberFormatException e) {
-            return arg;
+            return arg; // Raw string
         }
     }
+
 
 }

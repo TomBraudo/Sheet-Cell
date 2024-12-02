@@ -11,7 +11,7 @@
     <artifactId>Sheet-Cell-UI-Interface</artifactId>
 
     <dependencies>
-        <!-- Dependency on the engine module -->
+        <!-- Add dependency on the Sheet-Cell-Engine module -->
         <dependency>
             <groupId>com.example</groupId>
             <artifactId>Sheet-Cell-Engine</artifactId>
