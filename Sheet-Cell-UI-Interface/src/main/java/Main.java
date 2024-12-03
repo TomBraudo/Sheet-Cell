@@ -1,4 +1,6 @@
 import com.options.api.*;
+
+import java.util.Objects;
 import java.util.Scanner;
 public class Main {
     public static void main(String[] args)
@@ -8,23 +10,23 @@ public class Main {
 
         Options options = new Options(filePath);
 
-        char choice = 0;
+        String choice;
         do {
             try{
                 System.out.println("Please enter your choice: ");
-                choice = sc.next().charAt(0);
+                choice = sc.nextLine();
                 options.changeCellValue("D4", String.valueOf(choice));
 
             } catch(Exception e){
                 System.out.println(e.getMessage());
                 System.out.println("Enter Enter to continue: ");
-                sc.nextLine();
+                choice = sc.nextLine();
             }
             System.out.print("\033[H\033[2J");
             System.out.flush();
             options.showTable();
 
-        }while(choice != 'Q');
+        }while(!Objects.equals(choice, "Q"));
 
 
 

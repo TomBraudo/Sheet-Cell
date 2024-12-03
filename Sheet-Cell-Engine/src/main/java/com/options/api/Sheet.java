@@ -5,13 +5,15 @@ import javax.xml.parsers.*;
 import java.io.File;
 
 public class Sheet {
-    public static Sheet sheetRef;
+    private static final DependencyGraph dependencyGraph = new DependencyGraph();
+    private static Sheet sheetRef;
     private Cell[][] sheet;
     private String sheetName;
     private int rows;
     private int columns;
     private int rowsHeight;
     private int columnWidth;
+
 
     // Constructor to create a sheet from a file
     public Sheet(String filePath) {
@@ -158,5 +160,17 @@ public class Sheet {
     private boolean isCellPositionLegal (int row, int col) {
         return row >= 0 && row < this.rows && col >= 0 && col < this.columns;
     }
+
+    public static DependencyGraph getDependencyGraph() {
+        return dependencyGraph;
+    }
+
+    public static Cell getCellStatic(String cellName) {
+        if (sheetRef == null) {
+            throw new IllegalStateException("Sheet is not initialized.");
+        }
+        return sheetRef.getCell(cellName);
+    }
+
 
 }
