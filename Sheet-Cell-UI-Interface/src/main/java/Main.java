@@ -5,6 +5,8 @@ public class Main {
         String filePath = Main.class.getClassLoader().getResource("insurance.xml").getPath();
 
         Options options = new Options(filePath);
+
+        options.changeCellValue("E4", "15");
         options.showTable();
     }
 

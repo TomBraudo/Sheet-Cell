@@ -53,4 +53,9 @@ public class Options {
             }
         }
     }
+
+    public void changeCellValue(String cellName, String newValue) {
+        sheet.setCell(cellName, newValue);
+    }
+
 }

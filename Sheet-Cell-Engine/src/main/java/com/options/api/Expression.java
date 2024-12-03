@@ -3,10 +3,16 @@ package com.options.api;
 public class Expression {
     private final FunctionType functionType;
     private final Object[] arguments;
+    private final String functionName;
 
     public Expression(String functionName, Object... arguments) {
         this.functionType = FunctionRegistry.getFunctionType(functionName);
         this.arguments = arguments;
+        this.functionName = functionName;
+    }
+
+    public String getFunctionName() {
+        return functionName;
     }
 
     public Object evaluate() {

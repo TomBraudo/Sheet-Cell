@@ -5,6 +5,7 @@ import javax.xml.parsers.*;
 import java.io.File;
 
 public class Sheet {
+    public static Sheet sheetRef;
     private Cell[][] sheet;
     private String sheetName;
     private int rows;
@@ -15,7 +16,6 @@ public class Sheet {
     // Constructor to create a sheet from a file
     public Sheet(String filePath) {
         createSheet(filePath);
-        FunctionRegistry.setSheet(this);
     }
 
     // Constructor to create an empty sheet
@@ -30,6 +30,7 @@ public class Sheet {
                 sheet[i][j] = new Cell(getCellName(i, j), "");
             }
         }
+
         FunctionRegistry.setSheet(this);
     }
 
@@ -71,6 +72,8 @@ public class Sheet {
 
             // Initialize the sheet
             sheet = new Cell[rows][columns];
+            FunctionRegistry.setSheet(this);
+            sheetRef = this;
 
             // Populate cells from the XML
             NodeList cellList = doc.getElementsByTagName("STL-Cell");
@@ -127,18 +130,33 @@ public class Sheet {
         }
     }
 
+    Cell getCell(String cellName) {
+        int[] indices = getCellIndices(cellName);
+        return sheet[indices[0]][indices[1]];
+    }
+
     // Convert "A1" format to row and column indices
     private int[] getCellIndices(String cellName) {
         char colChar = cellName.charAt(0); // Column as a letter
         int row = Integer.parseInt(cellName.substring(1)) - 1; // Row as a 1-based number, convert to 0-based
         int col = colChar - 'A'; // Convert column letter to 0-based index
+        if (!isCellPositionLegal(row, col)) {
+            throw new RuntimeException("Invalid cell position: " + row + ", " + col);
+        }
         return new int[]{row, col};
     }
 
     // Convert row and column indices to "A1" format
     private String getCellName(int row, int col) {
+        if (!isCellPositionLegal(row, col)) {
+            throw new RuntimeException("Invalid cell position: " + row + ", " + col);
+        }
+
         return (char) ('A' + col) + Integer.toString(row + 1);
     }
 
+    private boolean isCellPositionLegal (int row, int col) {
+        return row >= 0 && row < this.rows && col >= 0 && col < this.columns;
+    }
 
 }
