@@ -66,15 +66,39 @@ class Cell {
 
 
     public void setValue(String inputValue) {
-        for(Cell cell : dependentCells) {
+        // Save the current value and effective value to allow rollback
+        Object oldValue = this.value;
+        Object oldEffectiveValue = this.effectiveValue;
+
+        // Clear existing dependencies and prepare for the new value
+        for (Cell cell : dependentCells) {
             cell.removeDependentCell(this);
         }
         dependentCells.clear();
-        this.value = parseValue(inputValue); // Update value
-        computeEffectiveValue(); // Recompute the effective value
-        addDependentCells(inputValue);
-        notifyDependents(); // Notify dependent cells
+
+        try {
+            // Parse and set the new value
+            this.value = parseValue(inputValue);
+
+            addDependentCells(inputValue);
+            // Validate dependents recursively
+            validateDependents();
+
+            // If validation passes, compute and update effective values
+            computeEffectiveValue();
+            updateDependentsEffectiveValues();
+        } catch (Exception e) {
+            // Rollback to the old state if validation fails
+            this.value = oldValue;
+            this.effectiveValue = oldEffectiveValue;
+
+            // Rebuild old dependencies
+            addDependentCells(inputValue);
+
+            throw e; // Forward the exception
+        }
     }
+
 
     private Object parseValue(String inputValue) {
         try {
@@ -106,6 +130,30 @@ class Cell {
     private void notifyDependents() {
         for (Cell dependent : dependentOnMe) {
             dependent.computeEffectiveValue(); // Recompute effective value for dependents
+        }
+    }
+
+    private void validateExpression() {
+        if (value instanceof Expression) {
+            // Attempt to evaluate the expression to check legality
+            ((Expression) value).evaluate();
+        }
+    }
+
+    private void validateDependents() {
+        for (Cell dependent : dependentOnMe) {
+            // Validate this dependent
+            dependent.validateExpression();
+
+            // Recursively validate its dependents
+            dependent.validateDependents();
+        }
+    }
+
+    private void updateDependentsEffectiveValues() {
+        for (Cell dependent : dependentOnMe) {
+            dependent.computeEffectiveValue();
+            dependent.updateDependentsEffectiveValues();
         }
     }
 }
