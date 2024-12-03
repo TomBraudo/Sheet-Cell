@@ -1,4 +1,5 @@
 package com.options.api;
+import java.lang.StringBuilder;
 
 public class Expression {
     private final FunctionType functionType;
@@ -33,5 +34,17 @@ public class Expression {
         } else {
             throw new IllegalArgumentException("Invalid argument type: " + arg.getClass().getName());
         }
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(String.format("{%s", functionName));
+        for (Object argument : arguments) {
+            sb.append(String.format(",%s", argument));
+        }
+        sb.append("}");
+
+        return sb.toString();
     }
 }

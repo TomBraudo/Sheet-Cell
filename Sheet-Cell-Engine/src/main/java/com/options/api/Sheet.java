@@ -3,6 +3,7 @@ package com.options.api;
 import org.w3c.dom.*;
 import javax.xml.parsers.*;
 import java.io.File;
+import java.util.ArrayList;
 
 public class Sheet {
     private static final DependencyGraph dependencyGraph = new DependencyGraph();
@@ -19,21 +20,6 @@ public class Sheet {
         createSheet(filePath);
     }
 
-    // Constructor to create an empty sheet
-    public Sheet(int rows, int columns) {
-        this.rows = rows;
-        this.columns = columns;
-        this.rowsHeight = 20;
-        this.columnWidth = 20;
-        sheet = new Cell[rows][columns];
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < columns; j++) {
-                sheet[i][j] = new Cell(getCellName(i, j), "");
-            }
-        }
-
-        FunctionRegistry.setSheet(this);
-    }
 
     // Method to initialize the sheet from an XML file
     private void createSheet(String filePath) {
@@ -87,8 +73,7 @@ public class Sheet {
                 String value = cellElement.getElementsByTagName("STL-Original-Value").item(0).getTextContent();
 
                 // Create the cell
-                sheet[row][colIndex] = new Cell(getCellName(row, colIndex), value);
-                sheet[row][colIndex].setOwner(this);
+                sheet[row][colIndex] = new Cell(getCellName(row, colIndex), value, this);
 
             }
         } catch (Exception e) {
@@ -125,8 +110,7 @@ public class Sheet {
     public void setCell(String cellName, String value) {
         int[] indices = getCellIndices(cellName);
         if (sheet[indices[0]][indices[1]] == null) {
-            sheet[indices[0]][indices[1]] = new Cell(cellName, value);
-            sheet[indices[0]][indices[1]].setOwner(this);
+            sheet[indices[0]][indices[1]] = new Cell(cellName, value, this);
         } else {
             sheet[indices[0]][indices[1]].setValue(value);
         }
@@ -165,6 +149,10 @@ public class Sheet {
         return dependencyGraph;
     }
 
+    CellData getCellData(String cellName) {
+        int[] indices = getCellIndices(cellName);
+        return sheet[indices[0]][indices[1]].getCellData();
+    }
 
 
 }

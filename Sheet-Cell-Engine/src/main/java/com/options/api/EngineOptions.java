@@ -1,5 +1,8 @@
 package com.options.api;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class EngineOptions {
     private final Sheet curSheet;
 
@@ -11,6 +14,13 @@ public class EngineOptions {
         return curSheet.getCellValue(cellName);
     }
 
+    public CellData getCellData(String cellName) {
+        return curSheet.getCellData(cellName);
+    }
+
+    public Sheet getCurSheet() {
+        return curSheet;
+    }
     public void setCellValue(String cellName, String value) {
         curSheet.setCell(cellName, value);
     }

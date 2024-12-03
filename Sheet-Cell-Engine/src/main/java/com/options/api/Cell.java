@@ -1,5 +1,6 @@
 package com.options.api;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -8,16 +9,14 @@ class Cell {
     private final String location;
     private Object value;
     private Object effectiveValue;
-    private static Sheet owner;
+    private Sheet owner;
 
-    public Cell(String location, String inputValue) {
+    public Cell(String location, String inputValue, Sheet owner) {
+        this.owner = owner;
         this.location = location;
         setValue(inputValue);
     }
 
-    public void setOwner(Sheet owner) {
-        this.owner = owner;
-    }
 
     public String getLocation() {
         return location;
@@ -99,6 +98,21 @@ class Cell {
             return inputValue;
         }
     }
+
+    CellData getCellData(){
+        ArrayList<String> dependsOn = new ArrayList<>();
+        for(Cell dependent : Sheet.getDependencyGraph().getDependencies(this)){
+            dependsOn.add(dependent.getLocation());
+        }
+
+        ArrayList<String> dependents = new ArrayList<>();
+        for(Cell dependent : Sheet.getDependencyGraph().getDependents(this)){
+            dependents.add(dependent.getLocation());
+        }
+
+        return new CellData(this.location, this.value.toString(), this.effectiveValue.toString(), dependsOn, dependents);
+    }
+
 
     private boolean isExpression(String inputValue) {
         return inputValue.startsWith("{") && inputValue.endsWith("}");

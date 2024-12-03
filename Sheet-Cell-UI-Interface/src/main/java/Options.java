@@ -1,12 +1,19 @@
 import com.options.api.*;
 
+import java.util.ArrayList;
 import java.util.Formatter;
+import java.util.List;
+import java.lang.StringBuilder;
 
 public class Options {
+
     private final Sheet sheet;
+    private final EngineOptions engineOptions;
 
     public Options(String filePath) {
-        sheet = new Sheet(filePath); // Load the sheet from the XML file
+        this.engineOptions = new EngineOptions(filePath);
+        this.sheet = engineOptions.getCurSheet();
+
     }
 
     public void showTable() {
@@ -58,4 +65,23 @@ public class Options {
         sheet.setCell(cellName, newValue);
     }
 
+    public void showCellValue(String cellName) {
+        CellData cellData = engineOptions.getCellData(cellName);
+        StringBuilder sb = new StringBuilder();
+        sb.append("Cell " + cellName + ": " + "\n");
+        sb.append("Original Value: " + cellData.getOriginalValue() + "\n");
+        sb.append("Effective Value: " + cellData.getEffectiveValue() + "\n");
+        sb.append("Dependent On: " + "\n");
+        for (String dependent : cellData.getDependentOn()) {
+            sb.append(dependent + ", ");
+        }
+        sb.append("\b\b\n");
+        sb.append("Dependents: " + "\n");
+        for (String dependent : cellData.getDependents()) {
+            sb.append(dependent + ", ");
+        }
+        sb.append("\b\b\n");
+
+        System.out.println(sb.toString());
+    }
 }

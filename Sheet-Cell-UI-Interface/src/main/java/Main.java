@@ -2,6 +2,7 @@ import com.options.api.*;
 
 import java.util.Objects;
 import java.util.Scanner;
+
 public class Main {
     public static void main(String[] args)
     {
@@ -15,16 +16,14 @@ public class Main {
             try{
                 System.out.println("Please enter your choice: ");
                 choice = sc.nextLine();
-                options.changeCellValue("D4", String.valueOf(choice));
+                options.showCellValue(choice);
 
             } catch(Exception e){
                 System.out.println(e.getMessage());
                 System.out.println("Enter Enter to continue: ");
                 choice = sc.nextLine();
             }
-            System.out.print("\033[H\033[2J");
-            System.out.flush();
-            options.showTable();
+
 
         }while(!Objects.equals(choice, "Q"));
 
