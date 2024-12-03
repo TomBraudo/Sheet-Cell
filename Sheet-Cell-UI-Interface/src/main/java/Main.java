@@ -5,7 +5,7 @@ public class Main {
         String filePath = Main.class.getClassLoader().getResource("insurance.xml").getPath();
 
         Options options = new Options(filePath);
-        System.out.println("Hello World!");
+        options.showTable();
     }
 
 }

@@ -9,6 +9,8 @@ public class Sheet {
     private String sheetName;
     private int rows;
     private int columns;
+    private int rowsHeight;
+    private int columnWidth;
 
     // Constructor to create a sheet from a file
     public Sheet(String filePath) {
@@ -20,6 +22,8 @@ public class Sheet {
     public Sheet(int rows, int columns) {
         this.rows = rows;
         this.columns = columns;
+        this.rowsHeight = 20;
+        this.columnWidth = 20;
         sheet = new Cell[rows][columns];
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < columns; j++) {
@@ -50,7 +54,20 @@ public class Sheet {
                 Element layout = (Element) layoutList.item(0);
                 rows = Integer.parseInt(layout.getAttribute("rows"));
                 columns = Integer.parseInt(layout.getAttribute("columns"));
+
+                // Fetch the STL-Size element as a child of the layout element
+                NodeList sizeList = layout.getElementsByTagName("STL-Size");
+                if (sizeList.getLength() > 0) {
+                    Element size = (Element) sizeList.item(0);
+                    columnWidth = Integer.parseInt(size.getAttribute("column-width-units"));
+                    rowsHeight = Integer.parseInt(size.getAttribute("rows-height-units"));
+                } else {
+                    throw new RuntimeException("STL-Size element is missing under STL-Layout.");
+                }
+            } else {
+                throw new RuntimeException("STL-Layout element is missing.");
             }
+
 
             // Initialize the sheet
             sheet = new Cell[rows][columns];
@@ -88,6 +105,13 @@ public class Sheet {
         return columns;
     }
 
+    public int getRowsHeight() {
+        return rowsHeight;
+    }
+    public int getColumnWidth() {
+        return columnWidth;
+    }
+
     public String getCellValue(String cellName) {
         int[] indices = getCellIndices(cellName);
         Cell cell = sheet[indices[0]][indices[1]];
@@ -105,16 +129,16 @@ public class Sheet {
 
     // Convert "A1" format to row and column indices
     private int[] getCellIndices(String cellName) {
-        char rowChar = cellName.charAt(0); // Row as a letter
-        int col = Integer.parseInt(cellName.substring(1)) - 1; // Column as a 1-based number, convert to 0-based
-        int row = rowChar - 'A'; // Convert row letter to 0-based index
+        char colChar = cellName.charAt(0); // Column as a letter
+        int row = Integer.parseInt(cellName.substring(1)) - 1; // Row as a 1-based number, convert to 0-based
+        int col = colChar - 'A'; // Convert column letter to 0-based index
         return new int[]{row, col};
     }
 
-
     // Convert row and column indices to "A1" format
     private String getCellName(int row, int col) {
-        return (char) ('A' + row) + Integer.toString(col + 1);
+        return (char) ('A' + col) + Integer.toString(row + 1);
     }
+
 
 }

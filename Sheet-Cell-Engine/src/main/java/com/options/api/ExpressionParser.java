@@ -92,8 +92,9 @@ public class ExpressionParser {
             return parseExpression(arg); // Nested expression
         }
 
-        if (arg.matches("[A-Z]+\\d+")) {
-            return arg; // Letter-row, number-column format
+        // Check if the argument is a cell reference in "A1" format
+        if (arg.matches("[A-Z]\\d+")) {
+            return arg; // Recognize column as letter and row as number
         }
 
         try {
@@ -102,6 +103,7 @@ public class ExpressionParser {
             return arg; // Raw string
         }
     }
+
 
 
 }

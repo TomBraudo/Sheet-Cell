@@ -16,35 +16,64 @@ public class FunctionRegistry {
         STRING_TO_TYPE.put("MOD", FunctionType.MOD);
         STRING_TO_TYPE.put("CONCAT", FunctionType.CONCAT);
         STRING_TO_TYPE.put("SUB", FunctionType.SUB);
-        STRING_TO_TYPE.put("REF", FunctionType.REF); // Add REF function
+        STRING_TO_TYPE.put("REF", FunctionType.REF);
 
-        TYPE_TO_FUNCTION.put(FunctionType.PLUS, (args) -> (double) args[0] + (double) args[1]);
-        TYPE_TO_FUNCTION.put(FunctionType.MINUS, (args) -> (double) args[0] - (double) args[1]);
-        TYPE_TO_FUNCTION.put(FunctionType.TIMES, (args) -> (double) args[0] * (double) args[1]);
-        TYPE_TO_FUNCTION.put(FunctionType.DIVIDE, (args) -> {
-            if ((double) args[1] == 0) throw new ArithmeticException("Division by zero");
-            return (double) args[0] / (double) args[1];
+        TYPE_TO_FUNCTION.put(FunctionType.PLUS, (args) -> {
+            double arg1 = toDouble(args[0]);
+            double arg2 = toDouble(args[1]);
+            return arg1 + arg2;
         });
-        TYPE_TO_FUNCTION.put(FunctionType.MOD, (args) -> (double) args[0] % (double) args[1]);
-        TYPE_TO_FUNCTION.put(FunctionType.CONCAT, (args) -> args[0].toString() + args[1].toString());
+
+        TYPE_TO_FUNCTION.put(FunctionType.MINUS, (args) -> {
+            double arg1 = toDouble(args[0]);
+            double arg2 = toDouble(args[1]);
+            return arg1 - arg2;
+        });
+
+        TYPE_TO_FUNCTION.put(FunctionType.TIMES, (args) -> {
+            double arg1 = toDouble(args[0]);
+            double arg2 = toDouble(args[1]);
+            return arg1 * arg2;
+        });
+
+        TYPE_TO_FUNCTION.put(FunctionType.DIVIDE, (args) -> {
+            double arg1 = toDouble(args[0]);
+            double arg2 = toDouble(args[1]);
+            if (arg2 == 0) {
+                throw new ArithmeticException("Division by zero");
+            }
+            return arg1 / arg2;
+        });
+
+        TYPE_TO_FUNCTION.put(FunctionType.MOD, (args) -> {
+            double arg1 = toDouble(args[0]);
+            double arg2 = toDouble(args[1]);
+            return arg1 % arg2;
+        });
+
+        TYPE_TO_FUNCTION.put(FunctionType.CONCAT, (args) -> {
+            String str1 = args[0].toString();
+            String str2 = args[1].toString();
+            return str1 + str2;
+        });
+
         TYPE_TO_FUNCTION.put(FunctionType.SUB, (args) -> {
-            String str = (String) args[0];
-            int start = (int) args[1];
-            int end = (int) args[2];
+            String str = args[0].toString();
+            int start = toInt(args[1]);
+            int end = toInt(args[2]);
             if (start < 0 || end > str.length() || start > end) {
                 throw new IllegalArgumentException("Invalid substring indices");
             }
             return str.substring(start, end);
         });
+
         TYPE_TO_FUNCTION.put(FunctionType.REF, (args) -> {
             if (sheet == null) {
                 throw new IllegalStateException("Sheet is not initialized");
             }
-            String cellName = (String) args[0];
-            return sheet.getCellValue(cellName); // Use the "letter-row, number-column" format
+            String cellName = args[0].toString(); // Argument must be in "A1" format
+            return sheet.getCellValue(cellName); // Fetch cell value using "A1" format
         });
-
-
     }
 
     public static FunctionType getFunctionType(String functionName) {
@@ -63,6 +92,28 @@ public class FunctionRegistry {
 
     public static void setSheet(Sheet s) {
         sheet = s;
+    }
+
+    private static double toDouble(Object arg) {
+        if (arg instanceof Number) {
+            return ((Number) arg).doubleValue();
+        } else if (arg instanceof String) {
+            try {
+                return Double.parseDouble((String) arg);
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException("Expected a numeric value but got: " + arg);
+            }
+        } else {
+            throw new IllegalArgumentException("Cannot convert to double: " + arg);
+        }
+    }
+
+    private static int toInt(Object arg) {
+        double value = toDouble(arg);
+        if (value % 1 != 0) {
+            throw new IllegalArgumentException("Expected an integer value but got: " + value);
+        }
+        return (int) value;
     }
 
     @FunctionalInterface
