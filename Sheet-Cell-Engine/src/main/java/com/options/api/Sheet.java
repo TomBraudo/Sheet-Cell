@@ -6,7 +6,6 @@ import java.io.File;
 
 public class Sheet {
     private static final DependencyGraph dependencyGraph = new DependencyGraph();
-    private static Sheet sheetRef;
     private Cell[][] sheet;
     private String sheetName;
     private int rows;
@@ -75,7 +74,6 @@ public class Sheet {
             // Initialize the sheet
             sheet = new Cell[rows][columns];
             FunctionRegistry.setSheet(this);
-            sheetRef = this;
 
             // Populate cells from the XML
             NodeList cellList = doc.getElementsByTagName("STL-Cell");
@@ -90,6 +88,7 @@ public class Sheet {
 
                 // Create the cell
                 sheet[row][colIndex] = new Cell(getCellName(row, colIndex), value);
+                sheet[row][colIndex].setOwner(this);
 
             }
         } catch (Exception e) {
@@ -127,6 +126,7 @@ public class Sheet {
         int[] indices = getCellIndices(cellName);
         if (sheet[indices[0]][indices[1]] == null) {
             sheet[indices[0]][indices[1]] = new Cell(cellName, value);
+            sheet[indices[0]][indices[1]].setOwner(this);
         } else {
             sheet[indices[0]][indices[1]].setValue(value);
         }
@@ -165,12 +165,6 @@ public class Sheet {
         return dependencyGraph;
     }
 
-    public static Cell getCellStatic(String cellName) {
-        if (sheetRef == null) {
-            throw new IllegalStateException("Sheet is not initialized.");
-        }
-        return sheetRef.getCell(cellName);
-    }
 
 
 }

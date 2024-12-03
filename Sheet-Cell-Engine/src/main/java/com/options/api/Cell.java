@@ -8,10 +8,15 @@ class Cell {
     private final String location;
     private Object value;
     private Object effectiveValue;
+    private static Sheet owner;
 
     public Cell(String location, String inputValue) {
         this.location = location;
         setValue(inputValue);
+    }
+
+    public void setOwner(Sheet owner) {
+        this.owner = owner;
     }
 
     public String getLocation() {
@@ -61,7 +66,7 @@ class Cell {
 
         while (m.find()) {
             String ref = m.group(1);
-            Cell referencedCell = Sheet.getCellStatic(ref);
+            Cell referencedCell = owner.getCell(ref);
             if (referencedCell != null) {
                 graph.addDependency(this, referencedCell);
             } else {
