@@ -1,10 +1,11 @@
 import java.lang.StringBuilder;
 
-public enum UserChoices {
+public enum MainUserChoices {
     LOAD_NEW_SHEET,
     DISPLAY_SHEET,
     DISPLAY_SINGLE_CELL,
-    CHANGE_CELL_VALUE;
+    CHANGE_CELL_VALUE,
+    DISPLAY_VERSIONS;
 
     public int argsNeeded() {
         switch (this) {
@@ -12,6 +13,7 @@ public enum UserChoices {
             case DISPLAY_SINGLE_CELL:
                 return 1;
             case DISPLAY_SHEET:
+            case DISPLAY_VERSIONS:
                 return 0;
             case CHANGE_CELL_VALUE:
                 return 2;
@@ -20,13 +22,13 @@ public enum UserChoices {
         }
     }
 
-    public static UserChoices getUserChoice(String choice){
-        return UserChoices.values()[Integer.parseInt(choice)- 1];
+    public static MainUserChoices getUserChoice(String choice){
+        return MainUserChoices.values()[Integer.parseInt(choice)- 1];
     }
 
     public static String getOptions() {
         StringBuilder sb = new StringBuilder();
-        for (UserChoices choice : UserChoices.values()) {
+        for (MainUserChoices choice : MainUserChoices.values()) {
             sb.append(String.format("%d. " + choice.name() + "\n", choice.ordinal() + 1));
         }
 

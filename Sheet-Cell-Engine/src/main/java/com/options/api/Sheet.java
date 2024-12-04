@@ -14,10 +14,43 @@ public class Sheet {
     private int rowsHeight;
     private int columnWidth;
 
+    private static final ArrayList<VersionData> versions = new ArrayList<>();
+    private final int currentVersion;
+    private int curNumberOfCellsChanged;
+    private boolean isEditingSheet = false;
 
     // Constructor to create a sheet from a file
     public Sheet(String filePath) {
         createSheet(filePath);
+        if(versions.isEmpty()) {
+            currentVersion = 0;
+        }
+        else {
+            currentVersion = versions.size();
+        }
+        curNumberOfCellsChanged = 0;
+    }
+
+    public static ArrayList<VersionData> getVersionsData() {
+        return versions;
+    }
+
+    public static VersionData getVersion(int requestedVersion){
+        return versions.get(requestedVersion);
+    }
+
+    public void startEditingSession(){
+        isEditingSheet = true;
+    }
+    public void endEditingSession(){
+        isEditingSheet = false;
+        String[][] effectiveCellData = new String[rows][columns];
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < columns; j++) {
+                effectiveCellData[i][j] = sheet[i][j].getEffectiveValueValue().toString();
+            }
+        }
+        versions.add(new VersionData(currentVersion, curNumberOfCellsChanged, effectiveCellData));
     }
 
 
@@ -126,7 +159,7 @@ public class Sheet {
     public String getCellValue(String cellName) {
         int[] indices = getCellIndices(cellName);
         Cell cell = sheet[indices[0]][indices[1]];
-        return cell != null ? cell.getValue().toString() : null;
+        return cell != null ? cell.getEffectiveValueValue().toString() : null;
     }
 
     public void setCell(String cellName, String value) {
@@ -136,6 +169,8 @@ public class Sheet {
         } else {
             sheet[indices[0]][indices[1]].setValue(value);
         }
+
+        curNumberOfCellsChanged++;
     }
 
     Cell getCell(String cellName) {
@@ -167,7 +202,7 @@ public class Sheet {
         return row >= 0 && row < this.rows && col >= 0 && col < this.columns;
     }
 
-    public static DependencyGraph getDependencyGraph() {
+    static DependencyGraph getDependencyGraph() {
         return dependencyGraph;
     }
 

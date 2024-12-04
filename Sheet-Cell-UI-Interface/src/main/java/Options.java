@@ -1,6 +1,7 @@
 import com.options.api.*;
 
 import java.lang.StringBuilder;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -8,7 +9,7 @@ public class Options {
 
     private Sheet sheet;
     private EngineOptions engineOptions;
-    private Map<UserChoices, Command> userChoicesActions;
+    private Map<MainUserChoices, Command> userChoicesActions;
 
     public Options(String filePath) {
         this.engineOptions = new EngineOptions(filePath);
@@ -17,7 +18,7 @@ public class Options {
 
     }
 
-    public void executeUserChoice(UserChoices userChoice, String... args) {
+    public void executeUserChoice(MainUserChoices userChoice, String... args) {
         Command action = userChoicesActions.get(userChoice);
         if (action != null) {
             action.execute(args);
@@ -28,11 +29,12 @@ public class Options {
     }
 
     private void initializeUserChoicesActions() {
-        userChoicesActions = new HashMap<UserChoices, Command>();
-        userChoicesActions.put(UserChoices.LOAD_NEW_SHEET, this::loadNewSheet);
-        userChoicesActions.put(UserChoices.DISPLAY_SHEET, this::showSheet);
-        userChoicesActions.put(UserChoices.CHANGE_CELL_VALUE, this::changeCellValue);
-        userChoicesActions.put(UserChoices.DISPLAY_SINGLE_CELL, this::showCellValue);
+        userChoicesActions = new HashMap<MainUserChoices, Command>();
+        userChoicesActions.put(MainUserChoices.LOAD_NEW_SHEET, this::loadNewSheet);
+        userChoicesActions.put(MainUserChoices.DISPLAY_SHEET, this::showSheet);
+        userChoicesActions.put(MainUserChoices.CHANGE_CELL_VALUE, this::changeCellValue);
+        userChoicesActions.put(MainUserChoices.DISPLAY_SINGLE_CELL, this::showCellValue);
+        userChoicesActions.put(MainUserChoices.DISPLAY_VERSIONS, this::showVersions);
     }
 
     public void loadNewSheet(String... args) {
@@ -117,6 +119,20 @@ public class Options {
             sb.append(dependent + ", ");
         }
         sb.append("\b\b\n");
+
+        System.out.println(sb.toString());
+    }
+
+    public void showVersions(String... args) {
+        if (args.length != 0) {
+            throw new IllegalArgumentException("Invalid number of arguments");
+        }
+        ArrayList<VersionData> versionsData = engineOptions.getVersionsData();
+        StringBuilder sb = new StringBuilder();
+        sb.append("Versions: " + "\n");
+        for (VersionData version : versionsData) {
+            sb.append(version.getVersion() + ". " + "Cells changed: " + version.getNumOfCellChanged() + "\n");
+        }
 
         System.out.println(sb.toString());
     }

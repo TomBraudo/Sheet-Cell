@@ -24,4 +24,12 @@ public class EngineOptions {
     public void setCellValue(String cellName, String value) {
         curSheet.setCell(cellName, value);
     }
+
+    public ArrayList<VersionData> getVersionsData(){
+        return Sheet.getVersionsData();
+    }
+
+    public VersionData getVersion(int version) {
+        return Sheet.getVersion(version);
+    }
 }

@@ -23,7 +23,7 @@ public class ConversationManager {
             showOptions();
             choice = sc.nextLine();
             try{
-                UserChoices userChoice = UserChoices.getUserChoice(choice);
+                MainUserChoices userChoice = MainUserChoices.getUserChoice(choice);
                 int numOfArgs = userChoice.argsNeeded();
                 String[] args = new String[numOfArgs];
                 for (int i = 0; i < numOfArgs; i++) {
@@ -44,6 +44,6 @@ public class ConversationManager {
 
     private void showOptions(){
         System.out.println("Enter your choice");
-        System.out.println(UserChoices.getOptions());
+        System.out.println(MainUserChoices.getOptions());
     }
 }
