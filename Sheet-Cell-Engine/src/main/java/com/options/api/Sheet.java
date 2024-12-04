@@ -25,6 +25,12 @@ public class Sheet {
     private void createSheet(String filePath) {
         try {
             File file = new File(filePath);
+
+            // Check if the file has the correct XML extension
+            if (!filePath.endsWith(".xml")) {
+                throw new IllegalArgumentException("File is not an XML file: " + filePath);
+            }
+
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = dbFactory.newDocumentBuilder();
             Document doc = builder.parse(file);
@@ -43,6 +49,14 @@ public class Sheet {
                 rows = Integer.parseInt(layout.getAttribute("rows"));
                 columns = Integer.parseInt(layout.getAttribute("columns"));
 
+                // Validate rows and columns range
+                if (rows < 1 || rows > 50) {
+                    throw new IllegalArgumentException("Invalid number of rows: " + rows + ". Must be between 1 and 50.");
+                }
+                if (columns < 1 || columns > 20) {
+                    throw new IllegalArgumentException("Invalid number of columns: " + columns + ". Must be between 1 and 20.");
+                }
+
                 // Fetch the STL-Size element as a child of the layout element
                 NodeList sizeList = layout.getElementsByTagName("STL-Size");
                 if (sizeList.getLength() > 0) {
@@ -56,7 +70,6 @@ public class Sheet {
                 throw new RuntimeException("STL-Layout element is missing.");
             }
 
-
             // Initialize the sheet
             sheet = new Cell[rows][columns];
             FunctionRegistry.setSheet(this);
@@ -69,17 +82,26 @@ public class Sheet {
                 String col = cellElement.getAttribute("column").toUpperCase();
                 int colIndex = col.charAt(0) - 'A'; // Convert letter to index
 
+                // Validate cell position
+                if (row < 0 || row >= rows || colIndex < 0 || colIndex >= columns) {
+                    throw new IllegalArgumentException("Invalid cell position: Row " + (row + 1) + ", Column " + col);
+                }
+
                 // Extract cell value
-                String value = cellElement.getElementsByTagName("STL-Original-Value").item(0).getTextContent();
+                NodeList valueNodes = cellElement.getElementsByTagName("STL-Original-Value");
+                if (valueNodes.getLength() == 0) {
+                    throw new IllegalArgumentException("Missing STL-Original-Value for cell at Row " + (row + 1) + ", Column " + col);
+                }
+                String value = valueNodes.item(0).getTextContent();
 
                 // Create the cell
                 sheet[row][colIndex] = new Cell(getCellName(row, colIndex), value, this);
-
             }
         } catch (Exception e) {
             throw new RuntimeException("Error creating sheet from file: " + filePath, e);
         }
     }
+
 
     // Getters
     public String getSheetName() {

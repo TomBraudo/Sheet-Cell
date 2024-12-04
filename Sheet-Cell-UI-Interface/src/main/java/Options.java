@@ -1,22 +1,52 @@
 import com.options.api.*;
 
-import java.util.ArrayList;
-import java.util.Formatter;
-import java.util.List;
 import java.lang.StringBuilder;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Options {
 
-    private final Sheet sheet;
-    private final EngineOptions engineOptions;
+    private Sheet sheet;
+    private EngineOptions engineOptions;
+    private Map<UserChoices, Command> userChoicesActions;
 
     public Options(String filePath) {
         this.engineOptions = new EngineOptions(filePath);
         this.sheet = engineOptions.getCurSheet();
+        initializeUserChoicesActions();
 
     }
 
-    public void showTable() {
+    public void executeUserChoice(UserChoices userChoice, String... args) {
+        Command action = userChoicesActions.get(userChoice);
+        if (action != null) {
+            action.execute(args);
+        }
+        else {
+            throw new IllegalArgumentException("Invalid user choice " + userChoice);
+        }
+    }
+
+    private void initializeUserChoicesActions() {
+        userChoicesActions = new HashMap<UserChoices, Command>();
+        userChoicesActions.put(UserChoices.LOAD_NEW_SHEET, this::loadNewSheet);
+        userChoicesActions.put(UserChoices.DISPLAY_SHEET, this::showSheet);
+        userChoicesActions.put(UserChoices.CHANGE_CELL_VALUE, this::changeCellValue);
+        userChoicesActions.put(UserChoices.DISPLAY_SINGLE_CELL, this::showCellValue);
+    }
+
+    public void loadNewSheet(String... args) {
+        if(args.length != 1) {
+            throw new IllegalArgumentException("Invalid number of arguments");
+        }
+        this.engineOptions = new EngineOptions(args[0]);
+        this.sheet = engineOptions.getCurSheet();
+    }
+
+    public void showSheet(String... args) {
+        if(args.length != 0) {
+            throw new IllegalArgumentException("Invalid number of arguments");
+        }
         int rows = sheet.getRows(); // Get the number of rows
         int columns = sheet.getColumns(); // Get the number of columns
         int columnWidth = sheet.getColumnWidth(); // Get the column width
@@ -61,14 +91,20 @@ public class Options {
         }
     }
 
-    public void changeCellValue(String cellName, String newValue) {
-        sheet.setCell(cellName, newValue);
+    public void changeCellValue(String... args) {
+        if(args.length != 2) {
+            throw new IllegalArgumentException("Invalid number of arguments");
+        }
+        sheet.setCell(args[0], args[1]);
     }
 
-    public void showCellValue(String cellName) {
-        CellData cellData = engineOptions.getCellData(cellName);
+    public void showCellValue(String... args) {
+        if(args.length != 1) {
+            throw new IllegalArgumentException("Invalid number of arguments");
+        }
+        CellData cellData = engineOptions.getCellData(args[0]);
         StringBuilder sb = new StringBuilder();
-        sb.append("Cell " + cellName + ": " + "\n");
+        sb.append("Cell " + args[0] + ": " + "\n");
         sb.append("Original Value: " + cellData.getOriginalValue() + "\n");
         sb.append("Effective Value: " + cellData.getEffectiveValue() + "\n");
         sb.append("Dependent On: " + "\n");
@@ -84,4 +120,6 @@ public class Options {
 
         System.out.println(sb.toString());
     }
+
+
 }
