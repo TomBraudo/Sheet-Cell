@@ -17,10 +17,27 @@ public class EngineOptions {
     public CellData getCellData(String cellName) {
         return curSheet.getCellData(cellName);
     }
-
-    public Sheet getCurSheet() {
-        return curSheet;
+    public void changeCellValue(String cellName, String newValue) {
+        curSheet.setCell(cellName, newValue);
     }
+
+    public int getRowCount() {
+        return curSheet.getRows();
+    }
+    public int getColumnCount() {
+        return curSheet.getColumns();
+    }
+    public int getColumnWidth(){
+        return curSheet.getColumnWidth();
+    }
+    public int getRowHeight() {
+        return curSheet.getRowsHeight();
+    }
+
+    public String[][] getTableValues(){
+        return curSheet.getTableValues();
+    }
+
     public void setCellValue(String cellName, String value) {
         curSheet.setCell(cellName, value);
     }

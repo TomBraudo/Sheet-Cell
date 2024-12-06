@@ -7,13 +7,11 @@ import java.util.Map;
 
 public class Options {
 
-    private Sheet sheet;
     private EngineOptions engineOptions;
     private Map<MainUserChoices, Command> userChoicesActions;
 
     public Options(String filePath) {
         this.engineOptions = new EngineOptions(filePath);
-        this.sheet = engineOptions.getCurSheet();
         initializeUserChoicesActions();
 
     }
@@ -42,17 +40,16 @@ public class Options {
             throw new IllegalArgumentException("Invalid number of arguments");
         }
         this.engineOptions = new EngineOptions(args[0]);
-        this.sheet = engineOptions.getCurSheet();
     }
 
     public void showSheet(String... args) {
         if(args.length != 0) {
             throw new IllegalArgumentException("Invalid number of arguments");
         }
-        int rows = sheet.getRows(); // Get the number of rows
-        int columns = sheet.getColumns(); // Get the number of columns
-        int columnWidth = sheet.getColumnWidth(); // Get the column width
-        int rowHeight = sheet.getRowsHeight(); // Get the row height
+        int rows = engineOptions.getRowCount(); // Get the number of rows
+        int columns = engineOptions.getColumnCount(); // Get the number of columns
+        int columnWidth = engineOptions.getColumnWidth(); // Get the column width
+        int rowHeight = engineOptions.getRowHeight(); // Get the row height
 
         // Create a dynamic format string for the cells
         String cellFormat = "%-" + columnWidth + "s";
@@ -65,6 +62,7 @@ public class Options {
         System.out.println();
         System.out.println("-".repeat((columns) * (columnWidth + 3) - 3)); // Separator line
 
+        String[][] values = engineOptions.getTableValues();
         // Print each row
         for (int row = 1; row <= rows; row++) {
             // Print the row number
@@ -72,12 +70,8 @@ public class Options {
 
             // Print the values for each column
             for (int col = 0; col < columns; col++) {
-                // Get the cell value using the "letter-row" format
-                String cellName = (char) ('A' + col) + Integer.toString(row);
-                String cellValue = sheet.getCellValue(cellName);
 
-                // Replace null or empty values with a space
-                cellValue = (cellValue == null || cellValue.isEmpty()) ? " " : cellValue;
+                String cellValue = values[row][col];
                 System.out.printf(cellFormat + "|", cellValue);
             }
             System.out.println();
@@ -97,7 +91,7 @@ public class Options {
         if(args.length != 2) {
             throw new IllegalArgumentException("Invalid number of arguments");
         }
-        sheet.setCell(args[0], args[1]);
+        engineOptions.setCellValue(args[0], args[1]);
     }
 
     public void showCellValue(String... args) {

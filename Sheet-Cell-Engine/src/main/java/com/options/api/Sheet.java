@@ -5,7 +5,7 @@ import javax.xml.parsers.*;
 import java.io.File;
 import java.util.ArrayList;
 
-public class Sheet {
+class Sheet {
     private static final DependencyGraph dependencyGraph = new DependencyGraph();
     private Cell[][] sheet;
     private String sheetName;
@@ -47,7 +47,7 @@ public class Sheet {
         String[][] effectiveCellData = new String[rows][columns];
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < columns; j++) {
-                effectiveCellData[i][j] = sheet[i][j].getEffectiveValueValue().toString();
+                effectiveCellData[i][j] = sheet[i][j].getEffectiveValue().toString();
             }
         }
         versions.add(new VersionData(currentVersion, curNumberOfCellsChanged, effectiveCellData));
@@ -159,9 +159,19 @@ public class Sheet {
     public String getCellValue(String cellName) {
         int[] indices = getCellIndices(cellName);
         Cell cell = sheet[indices[0]][indices[1]];
-        return cell != null ? cell.getEffectiveValueValue().toString() : null;
+        return cell != null ? cell.getEffectiveValue().toString() : null;
     }
 
+    public String[][] getTableValues() {
+        String[][] values = new String[rows][columns];
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < columns; j++) {
+                values[i][j] = sheet[i][j] != null ? sheet[i][j].getEffectiveValue().toString() : " ";
+            }
+        }
+
+        return values;
+    }
     public void setCell(String cellName, String value) {
         int[] indices = getCellIndices(cellName);
         if (sheet[indices[0]][indices[1]] == null) {

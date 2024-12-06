@@ -22,7 +22,7 @@ class Cell {
         return location;
     }
 
-    public Object getEffectiveValueValue() {
+    public Object getEffectiveValue() {
         return effectiveValue;
     }
 
