@@ -67,7 +67,7 @@ public class MainMenu {
             }
 
             if(!menuItems.get(choice - 1).getName().equalsIgnoreCase("Load Xml File")
-                    && options.getVersionsData() == null
+                    && options.getVersionsData().isEmpty()
                     && options.getCurSheet() == null) {
                 System.out.println("Please load an XML file or load system state before using the other options.");
                 continue;

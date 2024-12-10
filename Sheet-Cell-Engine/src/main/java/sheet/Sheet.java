@@ -18,19 +18,16 @@ public class Sheet {
     private int columnWidth;
 
     private static final ArrayList<SheetDTO> versions = new ArrayList<>();
-    private final int currentVersion;
+    private int currentVersion;
     private int curNumberOfCellsChanged;
 
     // Constructor to create a sheet from a file
     public Sheet(String filePath) {
+        versions.clear();
         createSheet(filePath);
-        if(versions.isEmpty()) {
-            currentVersion = 1;
-        }
-        else {
-            currentVersion = versions.size();
-        }
+        currentVersion = 1;
         curNumberOfCellsChanged = 0;
+        endEditingSession();
     }
 
     public static ArrayList<SheetDTO> getVersionsData() {
@@ -42,13 +39,12 @@ public class Sheet {
     }
 
     public SheetDTO getCurrentVersion(){
-        String[][] effectiveCellsData = getEffectiveCellsData();
-        SheetDTO sheetDTO = new SheetDTO(currentVersion, curNumberOfCellsChanged, effectiveCellsData, columnWidth, rowsHeight);
-        return sheetDTO;
+        return new SheetDTO(currentVersion, curNumberOfCellsChanged, getEffectiveCellsData(), columnWidth, rowsHeight);
     }
 
     public void endEditingSession(){
-        versions.add(new SheetDTO(currentVersion, curNumberOfCellsChanged, getEffectiveCellsData(), columnWidth, rowsHeight));
+        if(curNumberOfCellsChanged > 0)
+            versions.add(new SheetDTO(currentVersion++, curNumberOfCellsChanged, getEffectiveCellsData(), columnWidth, rowsHeight));
     }
 
     private String[][] getEffectiveCellsData(){
@@ -183,6 +179,7 @@ public class Sheet {
 
         return values;
     }
+
     public void setCell(String cellName, String value) {
         int[] indices = getCellIndices(cellName);
         if (sheet[indices[0]][indices[1]] == null) {
@@ -231,6 +228,4 @@ public class Sheet {
         int[] indices = getCellIndices(cellName);
         return sheet[indices[0]][indices[1]].getCellData();
     }
-
-
 }

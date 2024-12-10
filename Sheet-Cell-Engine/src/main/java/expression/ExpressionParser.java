@@ -5,20 +5,11 @@ import java.util.List;
 
 public class ExpressionParser {
     public static Expression parseExpression(String input) {
-        // Ensure the input starts and ends with curly braces
-        if (!input.startsWith("{") || !input.endsWith("}")) {
-            throw new IllegalArgumentException("Expression must be enclosed in curly braces: " + input);
-        }
 
-        // Remove the outer braces and split into function name and arguments
-        String content = input.substring(1, input.length() - 1);
-        String[] parts = content.split(",", 2);
-
-        if (parts.length < 1) {
-            throw new IllegalArgumentException("Expression is missing a function name: " + input);
-        }
+        String[] parts = getStrings(input);
 
         String functionName = parts[0].trim();
+
         String argumentsString = parts.length > 1 ? parts[1] : "";
 
         // Get the function type from the registry
@@ -32,6 +23,21 @@ public class ExpressionParser {
 
         // Create and return the unified Expression object
         return new Expression(functionName, arguments.toArray());
+    }
+
+    private static String[] getStrings(String input) {
+        if (!input.startsWith("{") || !input.endsWith("}")) {
+            throw new IllegalArgumentException("Expression must be enclosed in curly braces: " + input);
+        }
+
+        // Remove the outer braces and split into function name and arguments
+        String content = input.substring(1, input.length() - 1);
+        String[] parts = content.split(",", 2);
+
+        if (parts.length < 1) {
+            throw new IllegalArgumentException("Expression is missing a function name: " + input);
+        }
+        return parts;
     }
 
     private static void validateArguments(FunctionType type, List<Object> arguments) {

@@ -2,21 +2,20 @@ package expression;
 
 import java.lang.StringBuilder;
 
+/**
+* Represents a generic expression that can be evaluated to produce a result.
+* Supports different types of functions such as mathematical operations and string manipulations.
+*/
 public class Expression {
-    private final FunctionType functionType;
-    private final Object[] arguments;
-    private final String functionName;
+    private final FunctionType functionType; // The function type
+    private final Object[] arguments; //The arguments provided to the function
 
     public Expression(String functionName, Object... arguments) {
         this.functionType = FunctionRegistry.getFunctionType(functionName);
         this.arguments = arguments;
-        this.functionName = functionName;
     }
 
-    public String getFunctionName() {
-        return functionName;
-    }
-
+    //Evaluates the expression while evaluating all the nested expressions as well
     public Object evaluate() {
         Object[] evaluatedArgs = new Object[arguments.length];
         for (int i = 0; i < arguments.length; i++) {
@@ -24,6 +23,7 @@ public class Expression {
         }
         return FunctionRegistry.getFunctionHandler(functionType).execute(evaluatedArgs);
     }
+
 
     private Object parseArgument(Object arg) {
         if (arg instanceof Number || arg instanceof String) {
@@ -40,7 +40,7 @@ public class Expression {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(String.format("{%s", functionName));
+        sb.append(String.format("{%s", functionType.toString()));
         for (Object argument : arguments) {
             sb.append(String.format(",%s", argument));
         }

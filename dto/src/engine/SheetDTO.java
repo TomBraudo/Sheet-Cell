@@ -1,11 +1,12 @@
 package engine;
 
+//Class that helps to expose a sheet to the UI layer
 public class SheetDTO {
     private final int version;
     private final int numOfCellChanged;
     private final String[][] effectiveDataOfCells;
-    private int columnWidth;
-    private int rowHeight;
+    private final int columnWidth;
+    private final int rowHeight;
     public SheetDTO(int version, int numOfCellChanged, String[][] effectiveDataOfCells, int columnWidth, int rowHeight) {
         this.version = version;
         this.numOfCellChanged = numOfCellChanged;

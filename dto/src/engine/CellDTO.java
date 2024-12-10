@@ -1,6 +1,7 @@
 package engine;
 import java.util.List;
 
+//Class that helps to expose a single cell to the UI layer
 public class CellDTO {
     String location;
     String originalValue;
