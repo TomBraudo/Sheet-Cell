@@ -52,7 +52,7 @@ public class ShowVersion implements Command {
     }
 
     private void displayVersion(int versionNum){
-        SheetDTO sheetDTO = options.getVersion(versionNum);
+        SheetDTO sheetDTO = options.getVersion(versionNum - 1);
         SheetPrinter.printSheet(sheetDTO);
     }
 }

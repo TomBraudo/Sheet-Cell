@@ -28,7 +28,7 @@ public class SheetPrinter {
             // Print the values for each column
             for (int col = 0; col < columns; col++) {
 
-                String cellValue = values[row][col];
+                String cellValue = values[row-1][col];
                 System.out.printf(cellFormat + "|", cellValue);
             }
             System.out.println();
