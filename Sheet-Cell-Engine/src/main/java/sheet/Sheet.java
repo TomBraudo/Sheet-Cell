@@ -2,7 +2,7 @@ package sheet;
 
 import expression.FunctionRegistry;
 import engine.CellDTO;
-import engine.VersionDTO;
+import engine.SheetDTO;
 import org.w3c.dom.*;
 import javax.xml.parsers.*;
 import java.io.File;
@@ -17,16 +17,15 @@ public class Sheet {
     private int rowsHeight;
     private int columnWidth;
 
-    private static final ArrayList<VersionDTO> versions = new ArrayList<>();
+    private static final ArrayList<SheetDTO> versions = new ArrayList<>();
     private final int currentVersion;
     private int curNumberOfCellsChanged;
-    private boolean isEditingSheet = false;
 
     // Constructor to create a sheet from a file
     public Sheet(String filePath) {
         createSheet(filePath);
         if(versions.isEmpty()) {
-            currentVersion = 0;
+            currentVersion = 1;
         }
         else {
             currentVersion = versions.size();
@@ -34,28 +33,37 @@ public class Sheet {
         curNumberOfCellsChanged = 0;
     }
 
-    public static ArrayList<VersionDTO> getVersionsData() {
+    public static ArrayList<SheetDTO> getVersionsData() {
         return versions;
     }
 
-    public static VersionDTO getVersion(int requestedVersion){
+    public static SheetDTO getVersion(int requestedVersion){
         return versions.get(requestedVersion);
     }
 
-    public void startEditingSession(){
-        isEditingSheet = true;
+    public SheetDTO getCurrentVersion(){
+        String[][] effectiveCellsData = getEffectiveCellsData();
+        SheetDTO sheetDTO = new SheetDTO(currentVersion, curNumberOfCellsChanged, effectiveCellsData, columnWidth, rowsHeight);
+        return sheetDTO;
     }
+
     public void endEditingSession(){
-        isEditingSheet = false;
+        versions.add(new SheetDTO(currentVersion, curNumberOfCellsChanged, getEffectiveCellsData(), columnWidth, rowsHeight));
+    }
+
+    private String[][] getEffectiveCellsData(){
         String[][] effectiveCellData = new String[rows][columns];
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < columns; j++) {
-                effectiveCellData[i][j] = sheet[i][j].getEffectiveValue().toString();
+                if(sheet[i][j] != null)
+                    effectiveCellData[i][j] = sheet[i][j].getEffectiveValue().toString();
+                else
+                    effectiveCellData[i][j] = "";
             }
         }
-        versions.add(new VersionDTO(currentVersion, curNumberOfCellsChanged, effectiveCellData));
-    }
 
+        return effectiveCellData;
+    }
 
     // Method to initialize the sheet from an XML file
     private void createSheet(String filePath) {

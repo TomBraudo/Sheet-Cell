@@ -1,17 +1,16 @@
 package api;
 
 import engine.CellDTO;
-import engine.VersionDTO;
+import engine.SheetDTO;
 import sheet.Sheet;
 
 import java.util.ArrayList;
 
 public class EngineOptions {
-    private final Sheet curSheet;
+    private static Sheet curSheet = null;
 
-    public EngineOptions(String filePath) {
-        this.curSheet = new Sheet(filePath); // Initialize Sheet with the provided file path
-    }
+    public void SetNewSheet(String filePath) { curSheet = new Sheet(filePath);}
+
     public String getCellValue(String cellName) {
         return curSheet.getCellValue(cellName);
     }
@@ -36,19 +35,21 @@ public class EngineOptions {
         return curSheet.getRowsHeight();
     }
 
-    public String[][] getTableValues(){
-        return curSheet.getTableValues();
+    public SheetDTO getCurSheet() {
+        return curSheet.getCurrentVersion();
     }
 
     public void setCellValue(String cellName, String value) {
         curSheet.setCell(cellName, value);
     }
 
-    public ArrayList<VersionDTO> getVersionsData(){
+    public ArrayList<SheetDTO> getVersionsData(){
         return Sheet.getVersionsData();
     }
 
-    public VersionDTO getVersion(int version) {
+    public SheetDTO getVersion(int version) {
         return Sheet.getVersion(version);
     }
+
+    public void endEditingSession(){ curSheet.endEditingSession();}
 }
