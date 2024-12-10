@@ -1,4 +1,8 @@
-package com.options.api;
+package sheet;
+
+import expression.Expression;
+import expression.ExpressionParser;
+import engine.CellDTO;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -9,15 +13,13 @@ class Cell {
     private final String location;
     private Object value;
     private Object effectiveValue;
-    private Sheet owner;
+    private final Sheet owner;
 
     public Cell(String location, String inputValue, Sheet owner) {
         this.owner = owner;
         this.location = location;
         setValue(inputValue);
     }
-
-
     public String getLocation() {
         return location;
     }
@@ -99,7 +101,7 @@ class Cell {
         }
     }
 
-    CellData getCellData(){
+    CellDTO getCellData(){
         ArrayList<String> dependsOn = new ArrayList<>();
         for(Cell dependent : Sheet.getDependencyGraph().getDependencies(this)){
             dependsOn.add(dependent.getLocation());
@@ -110,7 +112,7 @@ class Cell {
             dependents.add(dependent.getLocation());
         }
 
-        return new CellData(this.location, this.value.toString(), this.effectiveValue.toString(), dependsOn, dependents);
+        return new CellDTO(this.location, this.value.toString(), this.effectiveValue.toString(), dependsOn, dependents);
     }
 
 

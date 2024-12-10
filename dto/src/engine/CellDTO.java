@@ -1,8 +1,7 @@
-package com.options.api;
-
+package engine;
 import java.util.List;
 
-public class CellData {
+public class CellDTO {
     String location;
     String originalValue;
     String effectiveValue;
@@ -10,7 +9,7 @@ public class CellData {
     List<String> dependents;
 
     //constructor
-    public CellData(String location, String originalValue, String effectiveValue, List<String> dependentOn, List<String> dependents) {
+    public CellDTO(String location, String originalValue, String effectiveValue, List<String> dependentOn, List<String> dependents) {
         this.location = location;
         this.originalValue = originalValue;
         this.effectiveValue = effectiveValue;

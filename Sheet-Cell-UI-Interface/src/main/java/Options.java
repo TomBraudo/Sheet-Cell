@@ -1,4 +1,6 @@
-import com.options.api.*;
+import api.EngineOptions;
+import engine.CellDTO;
+import engine.VersionDTO;
 
 import java.lang.StringBuilder;
 import java.util.ArrayList;
@@ -98,7 +100,7 @@ public class Options {
         if(args.length != 1) {
             throw new IllegalArgumentException("Invalid number of arguments");
         }
-        CellData cellData = engineOptions.getCellData(args[0]);
+        CellDTO cellData = engineOptions.getCellData(args[0]);
         StringBuilder sb = new StringBuilder();
         sb.append("Cell " + args[0] + ": " + "\n");
         sb.append("Original Value: " + cellData.getOriginalValue() + "\n");
@@ -121,10 +123,10 @@ public class Options {
         if (args.length != 0) {
             throw new IllegalArgumentException("Invalid number of arguments");
         }
-        ArrayList<VersionData> versionsData = engineOptions.getVersionsData();
+        ArrayList<VersionDTO> versionsData = engineOptions.getVersionsData();
         StringBuilder sb = new StringBuilder();
         sb.append("Versions: " + "\n");
-        for (VersionData version : versionsData) {
+        for (VersionDTO version : versionsData) {
             sb.append(version.getVersion() + ". " + "Cells changed: " + version.getNumOfCellChanged() + "\n");
         }
 

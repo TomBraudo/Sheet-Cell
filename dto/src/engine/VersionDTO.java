@@ -1,10 +1,10 @@
-package com.options.api;
+package engine;
 
-public class VersionData {
+public class VersionDTO {
     private final int version;
     private final int numOfCellChanged;
     private final String[][] effectiveDataOfCells;
-    public VersionData(int version, int numOfCellChanged, String[][] effectiveDataOfCells) {
+    public VersionDTO(int version, int numOfCellChanged, String[][] effectiveDataOfCells) {
         this.version = version;
         this.numOfCellChanged = numOfCellChanged;
         this.effectiveDataOfCells = effectiveDataOfCells;

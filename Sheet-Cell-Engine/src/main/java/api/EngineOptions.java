@@ -1,7 +1,10 @@
-package com.options.api;
+package api;
+
+import engine.CellDTO;
+import engine.VersionDTO;
+import sheet.Sheet;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class EngineOptions {
     private final Sheet curSheet;
@@ -9,12 +12,11 @@ public class EngineOptions {
     public EngineOptions(String filePath) {
         this.curSheet = new Sheet(filePath); // Initialize Sheet with the provided file path
     }
-
     public String getCellValue(String cellName) {
         return curSheet.getCellValue(cellName);
     }
 
-    public CellData getCellData(String cellName) {
+    public CellDTO getCellData(String cellName) {
         return curSheet.getCellData(cellName);
     }
     public void changeCellValue(String cellName, String newValue) {
@@ -42,11 +44,11 @@ public class EngineOptions {
         curSheet.setCell(cellName, value);
     }
 
-    public ArrayList<VersionData> getVersionsData(){
+    public ArrayList<VersionDTO> getVersionsData(){
         return Sheet.getVersionsData();
     }
 
-    public VersionData getVersion(int version) {
+    public VersionDTO getVersion(int version) {
         return Sheet.getVersion(version);
     }
 }

@@ -1,11 +1,14 @@
-package com.options.api;
+package sheet;
 
+import expression.FunctionRegistry;
+import engine.CellDTO;
+import engine.VersionDTO;
 import org.w3c.dom.*;
 import javax.xml.parsers.*;
 import java.io.File;
 import java.util.ArrayList;
 
-class Sheet {
+public class Sheet {
     private static final DependencyGraph dependencyGraph = new DependencyGraph();
     private Cell[][] sheet;
     private String sheetName;
@@ -14,7 +17,7 @@ class Sheet {
     private int rowsHeight;
     private int columnWidth;
 
-    private static final ArrayList<VersionData> versions = new ArrayList<>();
+    private static final ArrayList<VersionDTO> versions = new ArrayList<>();
     private final int currentVersion;
     private int curNumberOfCellsChanged;
     private boolean isEditingSheet = false;
@@ -31,11 +34,11 @@ class Sheet {
         curNumberOfCellsChanged = 0;
     }
 
-    public static ArrayList<VersionData> getVersionsData() {
+    public static ArrayList<VersionDTO> getVersionsData() {
         return versions;
     }
 
-    public static VersionData getVersion(int requestedVersion){
+    public static VersionDTO getVersion(int requestedVersion){
         return versions.get(requestedVersion);
     }
 
@@ -50,7 +53,7 @@ class Sheet {
                 effectiveCellData[i][j] = sheet[i][j].getEffectiveValue().toString();
             }
         }
-        versions.add(new VersionData(currentVersion, curNumberOfCellsChanged, effectiveCellData));
+        versions.add(new VersionDTO(currentVersion, curNumberOfCellsChanged, effectiveCellData));
     }
 
 
@@ -216,7 +219,7 @@ class Sheet {
         return dependencyGraph;
     }
 
-    CellData getCellData(String cellName) {
+    public CellDTO getCellData(String cellName) {
         int[] indices = getCellIndices(cellName);
         return sheet[indices[0]][indices[1]].getCellData();
     }

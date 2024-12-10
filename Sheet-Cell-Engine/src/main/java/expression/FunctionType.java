@@ -1,4 +1,4 @@
-package com.options.api;
+package expression;
 
 public enum FunctionType {
     PLUS,
@@ -8,5 +8,5 @@ public enum FunctionType {
     MOD,
     CONCAT,
     SUB,
-    REF; // New function for referencing cell values
+    REF;
 }
