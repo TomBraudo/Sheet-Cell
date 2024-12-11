@@ -1,12 +1,14 @@
 package expression;
 
+import java.io.Serializable;
 import java.lang.StringBuilder;
 
 /**
 * Represents a generic expression that can be evaluated to produce a result.
 * Supports different types of functions such as mathematical operations and string manipulations.
 */
-public class Expression {
+public class Expression implements Serializable {
+    private static final long serialVersionUID = 1L;
     private final FunctionType functionType; // The function type
     private final Object[] arguments; //The arguments provided to the function
 

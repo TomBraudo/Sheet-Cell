@@ -2,8 +2,10 @@ package api;
 
 import engine.CellDTO;
 import engine.SheetDTO;
+import expression.FunctionRegistry;
 import sheet.Sheet;
 
+import java.io.*;
 import java.util.ArrayList;
 
 //The only class available for the UI layer, all requests come through here
@@ -44,4 +46,46 @@ public class EngineOptions {
 
     //Method that announce to the engine that the user ended editing the file, and it should save a version
     public void endEditingSession(){ curSheet.endEditingSession();}
+
+    public void saveState(String filePath){
+
+        File file = new File(filePath);
+        try {
+            if(file.isDirectory()) {
+                file = new File(file, "state.ser");
+            }
+
+            file.getParentFile().mkdirs();
+
+            if(!file.exists()) {
+                file.createNewFile();
+            }
+
+            try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filePath))){
+                oos.writeObject(curSheet);
+            } catch (IOException e){
+                throw new RuntimeException("Failed to save state to file " + filePath, e);
+            }
+        } catch (IOException e){
+            throw new RuntimeException("Failed to save state to file " + filePath, e);
+        }
+
+
+    }
+
+    public void loadState(String filePath){
+        File file = new File(filePath);
+        if (!file.exists()){
+            throw new RuntimeException("File not found: " + filePath);
+        }
+
+
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(filePath))){
+            Sheet loadedSheet = (Sheet) ois.readObject();
+            curSheet = loadedSheet;
+            FunctionRegistry.setSheet(curSheet);
+        } catch (IOException | ClassNotFoundException e){
+            throw new RuntimeException("Failed to load state from file " + filePath, e);
+        }
+    }
 }

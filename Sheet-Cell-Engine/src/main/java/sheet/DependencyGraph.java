@@ -1,30 +1,20 @@
 package sheet;
 
+import java.io.Serializable;
 import java.util.*;
 
 /**
  * Represents a directed graph of dependencies between cells.
  * Provides methods for managing dependencies and detecting circular references.
  */
-class DependencyGraph {
+class DependencyGraph implements Serializable {
+    private static final long serialVersionUID = 1L;
     private final Map<Cell, Set<Cell>> dependencies = new HashMap<>();
 
-    /**
-     * Adds a dependency where the dependent cell depends on the given dependency cell.
-     *
-     * @param dependent  The dependent cell.
-     * @param dependency The cell it depends on.
-     */
     public void addDependency(Cell dependent, Cell dependency) {
         dependencies.computeIfAbsent(dependent, k -> new HashSet<>()).add(dependency);
     }
 
-    /**
-     * Removes a dependency relationship between two cells.
-     *
-     * @param dependent  The dependent cell.
-     * @param dependency The cell it no longer depends on.
-     */
     public void removeDependency(Cell dependent, Cell dependency) {
         if (dependencies.containsKey(dependent)) {
             dependencies.get(dependent).remove(dependency);
@@ -34,12 +24,6 @@ class DependencyGraph {
         }
     }
 
-    /**
-     * Retrieves all cells that are dependent on the given cell.
-     *
-     * @param dependent The cell whose dependents are to be found.
-     * @return A set of cells that depend on the given cell.
-     */
     public Set<Cell> getDependents(Cell dependent) {
         Set<Cell> dependents = new HashSet<>();
         for (Map.Entry<Cell, Set<Cell>> entry : dependencies.entrySet()) {
@@ -50,12 +34,6 @@ class DependencyGraph {
         return dependents;
     }
 
-    /**
-     * Retrieves all cells that the given cell depends on.
-     *
-     * @param cell The cell whose dependencies are to be found.
-     * @return A set of cells that the given cell depends on.
-     */
     public Set<Cell> getDependencies(Cell cell) {
         return dependencies.getOrDefault(cell, new HashSet<>());
     }
@@ -75,14 +53,6 @@ class DependencyGraph {
         return Collections.emptyList();
     }
 
-    /**
-     * Helper method to perform DFS and check for circular dependencies while tracking the path.
-     *
-     * @param current The current cell being visited.
-     * @param visited The set of cells already visited.
-     * @param path    The stack-like list to track the current path.
-     * @return True if a circular dependency is detected, false otherwise.
-     */
     private boolean hasCircularDependencyDFS(Cell current, Set<Cell> visited, List<Cell> path) {
         // If the current cell is already in the path, a cycle is detected
         if (path.contains(current)) {

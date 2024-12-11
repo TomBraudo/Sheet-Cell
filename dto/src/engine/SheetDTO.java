@@ -1,7 +1,10 @@
 package engine;
 
+import java.io.Serializable;
+
 //Class that helps to expose a sheet to the UI layer
-public class SheetDTO {
+public class SheetDTO implements Serializable {
+    private static final long serialVersionUID = 1L;
     private final int version;
     private final int numOfCellChanged;
     private final String[][] effectiveDataOfCells;

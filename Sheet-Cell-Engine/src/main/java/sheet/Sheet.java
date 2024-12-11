@@ -6,9 +6,11 @@ import engine.SheetDTO;
 import org.w3c.dom.*;
 import javax.xml.parsers.*;
 import java.io.File;
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Sheet {
+public class Sheet implements Serializable {
+    private static final long serialVersionUID = 1L;
     private static final DependencyGraph dependencyGraph = new DependencyGraph();
     private Cell[][] sheet;
     private String sheetName;
@@ -43,8 +45,10 @@ public class Sheet {
     }
 
     public void endEditingSession(){
-        if(curNumberOfCellsChanged > 0)
+        if(curNumberOfCellsChanged > 0) {
             versions.add(new SheetDTO(currentVersion++, curNumberOfCellsChanged, getEffectiveCellsData(), columnWidth, rowsHeight));
+            curNumberOfCellsChanged = 0;
+        }
     }
 
     private String[][] getEffectiveCellsData(){
@@ -138,30 +142,10 @@ public class Sheet {
                 sheet[row][colIndex] = new Cell(getCellName(row, colIndex), value, this);
             }
         } catch (Exception e) {
-            throw new RuntimeException("Error creating sheet from file: " + filePath, e);
+            throw new RuntimeException("Error creating sheet from file: " + filePath + "\n" + e.getMessage());
         }
     }
 
-
-    // Getters
-    public String getSheetName() {
-        return sheetName;
-    }
-
-    public int getRows() {
-        return rows;
-    }
-
-    public int getColumns() {
-        return columns;
-    }
-
-    public int getRowsHeight() {
-        return rowsHeight;
-    }
-    public int getColumnWidth() {
-        return columnWidth;
-    }
 
     public String getCellValue(String cellName) {
         int[] indices = getCellIndices(cellName);

@@ -4,12 +4,14 @@ import expression.Expression;
 import expression.ExpressionParser;
 import engine.CellDTO;
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 //Class that represents a single cell in the sheet
-class Cell {
+class Cell implements Serializable {
+    private static final long serialVersionUID = 1L;
     private final String location; //The cell's name (A1, C15...)
     private Object value; //The object that represents the value in the cell, could be an expression and also just a simple value (numerical, string...)
     private Object effectiveValue; //The effective value in the cell, the calculated expression or the simple value

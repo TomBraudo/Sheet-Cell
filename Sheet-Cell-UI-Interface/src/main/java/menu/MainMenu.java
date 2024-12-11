@@ -34,10 +34,12 @@ public class MainMenu {
 
     private void initializeMenuItems() {
         menuItems.add(new MenuItem("Load Xml File", new LoadXmlFile(options), this));
+        menuItems.add(new MenuItem("Load state", new LoadState(options), this));
         menuItems.add(new MenuItem("Display Sheet", new DisplaySheet(options), this));
         menuItems.add(new MenuItem("Show Cell Value", new ShowCellValue(options), this));
         menuItems.add(new MenuItem("Update Cell Value", new UpdateCellValue(options), this));
         menuItems.add(new MenuItem("Show Version", new ShowVersion(options), this));
+        menuItems.add(new MenuItem("Save state", new SaveState(options), this));
         menuItems.add(new MenuItem("Exit", new ExitCommand(), this));
     }
 
@@ -67,6 +69,7 @@ public class MainMenu {
             }
 
             if(!menuItems.get(choice - 1).getName().equalsIgnoreCase("Load Xml File")
+                    && !menuItems.get(choice - 1).getName().equalsIgnoreCase("Load state")
                     && options.getVersionsData().isEmpty()
                     && options.getCurSheet() == null) {
                 System.out.println("Please load an XML file or load system state before using the other options.");
