@@ -15,8 +15,11 @@ public class LoadState implements Command {
     @Override
     public void execute() {
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Enter file path to load state from: ");
+        System.out.println("Enter file path to load state from, or '1' to return to the main menu: ");
         String filePath = scanner.nextLine();
+        if (filePath.equals("1")) {
+            return;
+        }
 
         try {
             options.loadState(filePath);

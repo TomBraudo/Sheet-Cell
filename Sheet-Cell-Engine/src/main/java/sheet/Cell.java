@@ -37,7 +37,7 @@ class Cell implements Serializable {
         Object oldEffectiveValue = this.effectiveValue;
 
         // Save dependencies for rollback
-        DependencyGraph graph = Sheet.getDependencyGraph();
+        DependencyGraph graph = owner.getDependencyGraph();
         Set<Cell> oldDependencies = new HashSet<>(graph.getDependencies(this));
         Map<Cell, Object> oldDependentsState = new HashMap<>();
 
@@ -133,12 +133,12 @@ class Cell implements Serializable {
 
     CellDTO getCellData(){
         ArrayList<String> dependsOn = new ArrayList<>();
-        for(Cell dependent : Sheet.getDependencyGraph().getDependencies(this)){
+        for(Cell dependent : owner.getDependencyGraph().getDependencies(this)){
             dependsOn.add(dependent.getLocation());
         }
 
         ArrayList<String> dependents = new ArrayList<>();
-        for(Cell dependent : Sheet.getDependencyGraph().getDependents(this)){
+        for(Cell dependent : owner.getDependencyGraph().getDependents(this)){
             dependents.add(dependent.getLocation());
         }
 

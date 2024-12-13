@@ -15,8 +15,11 @@ public class SaveState implements Command {
     @Override
     public void execute() {
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Enter the file path to save state to:");
+        System.out.println("Enter the file path to save state to, or '1' to return to the main menu:");
         String filePath = scanner.nextLine();
+        if (filePath.equals("1")) {
+            return;
+        }
 
         try {
             options.saveState(filePath);

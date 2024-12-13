@@ -11,7 +11,7 @@ import java.util.ArrayList;
 
 public class Sheet implements Serializable {
     private static final long serialVersionUID = 1L;
-    private static final DependencyGraph dependencyGraph = new DependencyGraph();
+    private final DependencyGraph dependencyGraph = new DependencyGraph();
     private Cell[][] sheet;
     private String sheetName;
     private int rows;
@@ -19,7 +19,7 @@ public class Sheet implements Serializable {
     private int rowsHeight;
     private int columnWidth;
 
-    private static final ArrayList<SheetDTO> versions = new ArrayList<>();
+    private final ArrayList<SheetDTO> versions = new ArrayList<>();
     private int currentVersion;
     private int curNumberOfCellsChanged;
 
@@ -32,11 +32,11 @@ public class Sheet implements Serializable {
         endEditingSession();
     }
 
-    public static ArrayList<SheetDTO> getVersionsData() {
+    public ArrayList<SheetDTO> getVersionsData() {
         return versions;
     }
 
-    public static SheetDTO getVersion(int requestedVersion){
+    public SheetDTO getVersion(int requestedVersion){
         return versions.get(requestedVersion);
     }
 
@@ -204,7 +204,7 @@ public class Sheet implements Serializable {
         return row >= 0 && row < this.rows && col >= 0 && col < this.columns;
     }
 
-    static DependencyGraph getDependencyGraph() {
+    DependencyGraph getDependencyGraph() {
         return dependencyGraph;
     }
 

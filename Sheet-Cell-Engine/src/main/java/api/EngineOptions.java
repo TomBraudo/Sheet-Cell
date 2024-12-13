@@ -36,12 +36,12 @@ public class EngineOptions {
 
     //Method that returns all the different sheet versions of the current sheet
     public ArrayList<SheetDTO> getVersionsData(){
-        return Sheet.getVersionsData();
+        return curSheet.getVersionsData();
     }
 
     //Method that returns a version by its #
     public SheetDTO getVersion(int version) {
-        return Sheet.getVersion(version);
+        return curSheet.getVersion(version);
     }
 
     //Method that announce to the engine that the user ended editing the file, and it should save a version
@@ -61,7 +61,7 @@ public class EngineOptions {
                 file.createNewFile();
             }
 
-            try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filePath))){
+            try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(file))){
                 oos.writeObject(curSheet);
             } catch (IOException e){
                 throw new RuntimeException("Failed to save state to file " + filePath, e);
@@ -73,19 +73,25 @@ public class EngineOptions {
 
     }
 
-    public void loadState(String filePath){
+    public void loadState(String filePath) {
         File file = new File(filePath);
-        if (!file.exists()){
+
+        // Ensure the file exists
+        if (!file.exists()) {
             throw new RuntimeException("File not found: " + filePath);
         }
 
-
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(filePath))){
+        // Deserialize the sheet
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file))) {
             Sheet loadedSheet = (Sheet) ois.readObject();
             curSheet = loadedSheet;
+
+            // Restore the FunctionRegistry state
             FunctionRegistry.setSheet(curSheet);
-        } catch (IOException | ClassNotFoundException e){
-            throw new RuntimeException("Failed to load state from file " + filePath, e);
+
+        } catch (IOException | ClassNotFoundException e) {
+            throw new RuntimeException("Failed to load state from file: " + filePath, e);
         }
     }
+
 }
