@@ -25,11 +25,10 @@ public class Sheet implements Serializable {
 
     // Constructor to create a sheet from a file
     public Sheet(String filePath) {
-        versions.clear();
         createSheet(filePath);
         currentVersion = 1;
         curNumberOfCellsChanged = 0;
-        endEditingSession();
+        versions.add(new SheetDTO(currentVersion++, curNumberOfCellsChanged, getEffectiveCellsData(), columnWidth, rowsHeight));
     }
 
     public ArrayList<SheetDTO> getVersionsData() {
