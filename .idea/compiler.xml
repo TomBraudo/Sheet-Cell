@@ -7,8 +7,9 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="Sheet-Cell-Engine" />
-        <module name="Sheet-Cell-UI-Interface" />
+        <module name="Sheet-Cell-UI-Interface-console" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel target="11" />
   </component>
 </project>

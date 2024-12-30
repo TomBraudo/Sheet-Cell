@@ -6,9 +6,20 @@
     <artifactId>sheet-cell-project</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-
     <modules>
         <module>Sheet-Cell-Engine</module>
-        <module>Sheet-Cell-UI-Interface</module>
+        <module>Sheet-Cell-UI-Interface-console</module>
     </modules>
+
+    <properties>
+        <!-- Java Version -->
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- Place shared dependencies here -->
+        </dependencies>
+    </dependencyManagement>
 </project>

@@ -8,16 +8,15 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>Sheet-Cell-Engine</artifactId>
+    <artifactId>Sheet-Cell-UI-Interface-console</artifactId>
 
     <dependencies>
-        <!-- Add dependencies specific to the engine module -->
+        <!-- Add dependency on the Sheet-Cell-Engine module -->
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>2.15.2</version> <!-- Use the latest version -->
+            <groupId>com.example</groupId>
+            <artifactId>Sheet-Cell-Engine</artifactId>
+            <version>1.0-SNAPSHOT</version>
         </dependency>
-
     </dependencies>
     <build>
         <plugins>
@@ -25,8 +24,8 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>9</source>
-                    <target>9</target>
+                    <source>11</source>
+                    <target>11</target>
                 </configuration>
             </plugin>
         </plugins>
