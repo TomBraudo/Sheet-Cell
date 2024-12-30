@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.Label?>
+
+<VBox xmlns:fx="http://javafx.com/fxml" fx:controller="shticell.javafx.Controllers.MenuController" spacing="20" alignment="center">
+    <Label text="Welcome to Sheet Viewer" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
+    <Button text="Load Sheet from XML" onAction="#loadSheetFromXML"/>
+    <Button text="Load Existing State" onAction="#loadExistingState"/>
+</VBox>
