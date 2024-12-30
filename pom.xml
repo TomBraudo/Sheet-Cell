@@ -8,7 +8,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>Sheet-Cell-Engine</module>
-        <module>Sheet-Cell-UI-Interface</module>
+        <module>Sheet-Cell-UI-Interface-console</module>
     </modules>
 
     <properties>

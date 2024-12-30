@@ -8,7 +8,7 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>Sheet-Cell-UI-Interface</artifactId>
+    <artifactId>Sheet-Cell-UI-Interface-console</artifactId>
 
     <dependencies>
         <!-- Add dependency on the Sheet-Cell-Engine module -->
