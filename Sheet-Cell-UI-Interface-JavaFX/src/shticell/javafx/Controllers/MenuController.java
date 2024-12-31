@@ -32,7 +32,7 @@ public class MenuController {
     public void loadExistingState() {
         try {
             // Prompt for state file path
-            String filePath = getPathFromFileChooser(new ExtensionFilter("State files", "*.state"));
+            String filePath = getPathFromFileChooser(new ExtensionFilter("State files", "*.ser", "*.state"));
             engineOptions.loadState(filePath);
             openSheetWindow(engineOptions);
         } catch (Exception e) {
@@ -40,7 +40,7 @@ public class MenuController {
         }
     }
 
-    private String getPathFromFileChooser(ExtensionFilter extensionFilter) {
+    public static String getPathFromFileChooser(ExtensionFilter extensionFilter) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open File");
         fileChooser.getExtensionFilters().add(extensionFilter);

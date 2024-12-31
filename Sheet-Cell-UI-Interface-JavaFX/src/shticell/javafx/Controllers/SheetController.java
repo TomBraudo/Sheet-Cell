@@ -4,15 +4,23 @@ import api.EngineOptions;
 import engine.SheetDTO;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
+import javafx.stage.FileChooser;
+
+import java.awt.event.ActionEvent;
+import java.util.List;
 
 public class SheetController {
+
 
     private EngineOptions engineOptions;
 
     @FXML
     private GridPane gridPane;
+    @FXML
+    private Button SaveStateBtn;
 
     /**
      * Sets the EngineOptions instance for this controller.
@@ -23,6 +31,7 @@ public class SheetController {
         this.engineOptions = engineOptions;
         displaySheet(); // Immediately display the sheet
     }
+
 
     private void displaySheet() {
 
@@ -97,5 +106,11 @@ public class SheetController {
 
         // Remove debug grid lines
         gridPane.setGridLinesVisible(false);
+    }
+
+    @FXML
+    public void saveStateBtnOnAction(javafx.event.ActionEvent actionEvent) {
+        String path = MenuController.getPathFromFileChooser(new FileChooser.ExtensionFilter("State Files","*.state","*.ser"));
+        engineOptions.saveState(path);
     }
 }
