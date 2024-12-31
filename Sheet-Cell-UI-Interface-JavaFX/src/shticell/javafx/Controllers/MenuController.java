@@ -1,14 +1,16 @@
 package shticell.javafx.Controllers;
 
 import api.EngineOptions;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.ProgressIndicator;
+import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
-import javafx.stage.Stage;
 import javafx.stage.FileChooser.ExtensionFilter;
-import shticell.javafx.Controllers.SheetController;
+import javafx.stage.Stage;
 
 import java.io.File;
 
@@ -17,26 +19,60 @@ public class MenuController {
     private final EngineOptions engineOptions = new EngineOptions();
 
     @FXML
+    private VBox root; // Root layout for the menu
+    @FXML
+    private ProgressIndicator progressIndicator; // Progress indicator for long-running tasks
+
+    @FXML
     public void loadSheetFromXML() {
-        try {
-            // Prompt for XML file path
-            String filePath = getPathFromFileChooser(new ExtensionFilter("XML files", "*.xml"));
+        runTaskWithProgress(new ExtensionFilter("XML files", "*.xml"), filePath -> {
             engineOptions.SetNewSheet(filePath);
-            openSheetWindow(engineOptions);
-        } catch (Exception e) {
-            System.err.println("Failed to load sheet from XML: " + e.getMessage());
-        }
+        });
     }
 
     @FXML
     public void loadExistingState() {
-        try {
-            // Prompt for state file path
-            String filePath = getPathFromFileChooser(new ExtensionFilter("State files", "*.ser", "*.state"));
+        runTaskWithProgress(new ExtensionFilter("State files", "*.ser", "*.state"), filePath -> {
             engineOptions.loadState(filePath);
-            openSheetWindow(engineOptions);
+        });
+    }
+
+    private void runTaskWithProgress(ExtensionFilter extensionFilter, TaskAction taskAction) {
+        try {
+            String filePath = getPathFromFileChooser(extensionFilter);
+
+            Task<Void> task = new Task<>() {
+                @Override
+                protected Void call() throws Exception {
+                    // Simulate progress over time
+                    for (int i = 1; i <= 10; i++) {
+                        updateProgress(i, 10); // Update progress
+                        Thread.sleep(250); // Simulate work
+                    }
+
+                    // Perform the specified action
+                    taskAction.execute(filePath);
+                    return null;
+                }
+
+                @Override
+                protected void succeeded() {
+                    progressIndicator.setVisible(false); // Hide progress indicator
+                    openSheetWindow(engineOptions);
+                }
+
+                @Override
+                protected void failed() {
+                    progressIndicator.setVisible(false); // Hide progress indicator
+                    System.err.println("Task failed: " + getException().getMessage());
+                    getException().printStackTrace();
+                }
+            };
+
+            bindProgressToTask(task);
+            new Thread(task).start();
         } catch (Exception e) {
-            System.err.println("Failed to load existing state: " + e.getMessage());
+            System.err.println("Failed to process file: " + e.getMessage());
         }
     }
 
@@ -52,7 +88,6 @@ public class MenuController {
         }
         fileChooser.setInitialDirectory(initialDir);
 
-        // Open file chooser
         File selectedFile = fileChooser.showOpenDialog(null);
         if (selectedFile != null) {
             return selectedFile.getAbsolutePath();
@@ -86,5 +121,15 @@ public class MenuController {
             System.err.println("Failed to open sheet window: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    private void bindProgressToTask(Task<?> task) {
+        progressIndicator.progressProperty().bind(task.progressProperty());
+        progressIndicator.setVisible(true);
+    }
+
+    @FunctionalInterface
+    private interface TaskAction {
+        void execute(String filePath) throws Exception;
     }
 }

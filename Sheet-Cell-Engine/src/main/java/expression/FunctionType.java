@@ -8,5 +8,8 @@ public enum FunctionType {
     MOD,
     CONCAT,
     SUB,
-    REF;
+    REF,
+    SUM,
+    AVERAGE,
+    PERCENT;
 }

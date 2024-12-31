@@ -20,6 +20,9 @@ public class FunctionRegistry {
         STRING_TO_TYPE.put("CONCAT", FunctionType.CONCAT);
         STRING_TO_TYPE.put("SUB", FunctionType.SUB);
         STRING_TO_TYPE.put("REF", FunctionType.REF);
+        STRING_TO_TYPE.put("SUM", FunctionType.SUM);
+        STRING_TO_TYPE.put("AVERAGE", FunctionType.AVERAGE);
+        STRING_TO_TYPE.put("PERCENT", FunctionType.PERCENT);
 
         TYPE_TO_FUNCTION.put(FunctionType.PLUS, (args) -> {
             double arg1 = toDouble(args[0]);
@@ -77,6 +80,52 @@ public class FunctionRegistry {
             String cellName = args[0].toString(); // Argument must be in "A1" format
             return sheet.getCellValue(cellName); // Fetch cell value using "A1" format
         });
+
+        TYPE_TO_FUNCTION.put(FunctionType.SUM, (args) -> {
+            if (args.length != 1 || !(args[0] instanceof String)) {
+                throw new IllegalArgumentException("SUM requires a single range argument");
+            }
+
+            String range = args[0].toString();
+            if (sheet == null) {
+                throw new IllegalStateException("Sheet is not initialized");
+            }
+
+            return sheet.resolveRange(range).stream()
+                    .mapToDouble(FunctionRegistry::toDouble) // Convert all values to double
+                    .sum(); // Sum them up
+        });
+
+        TYPE_TO_FUNCTION.put(FunctionType.AVERAGE, (args) -> {
+            if (args.length != 1 || !(args[0] instanceof String)) {
+                throw new IllegalArgumentException("AVERAGE requires a single range argument");
+            }
+
+            String range = args[0].toString();
+            if (sheet == null) {
+                throw new IllegalStateException("Sheet is not initialized");
+            }
+
+            return sheet.resolveRange(range).stream()
+                    .mapToDouble(FunctionRegistry::toDouble) // Convert all values to double
+                    .average() // Compute the average
+                    .orElse(0.0); // Return 0 if the range is empty
+        });
+
+        TYPE_TO_FUNCTION.put(FunctionType.PERCENT, (args) -> {
+            if (args.length != 2) {
+                throw new IllegalArgumentException("PERCENT requires exactly 2 arguments");
+            }
+            double part = toDouble(args[0]);
+            double whole = toDouble(args[1]);
+            if (whole == 0) {
+                throw new ArithmeticException("Division by zero in PERCENT function");
+            }
+            return (part / whole) * 100;
+        });
+
+
+
     }
 
     public static FunctionType getFunctionType(String functionName) {

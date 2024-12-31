@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.control.Label?>
 
-<VBox xmlns:fx="http://javafx.com/fxml" fx:controller="shticell.javafx.Controllers.MenuController" spacing="20" alignment="center">
-    <Label text="Welcome to Sheet Viewer" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
-    <Button text="Load Sheet from XML" onAction="#loadSheetFromXML"/>
-    <Button text="Load Existing State" onAction="#loadExistingState"/>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox alignment="center" prefHeight="198.0" prefWidth="388.0" spacing="20" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/23.0.1" fx:controller="shticell.javafx.Controllers.MenuController">
+    <Label prefHeight="42.0" prefWidth="242.0" style="-fx-font-size: 20px; -fx-font-weight: bold;" text="Welcome to Sheet Viewer" />
+    <Button onAction="#loadSheetFromXML" text="Load Sheet from XML" />
+    <Button onAction="#loadExistingState" text="Load Existing State" />
+   <ProgressBar fx:id="progressIndicator" prefWidth="200.0" progress="0.0" visible="false" />
 </VBox>

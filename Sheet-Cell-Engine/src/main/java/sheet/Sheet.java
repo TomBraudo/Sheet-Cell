@@ -8,6 +8,7 @@ import javax.xml.parsers.*;
 import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 
 public class Sheet implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -211,4 +212,33 @@ public class Sheet implements Serializable {
         int[] indices = getCellIndices(cellName);
         return sheet[indices[0]][indices[1]].getCellData();
     }
+
+    public List<Object> resolveRange(String range) {
+        List<Object> values = new ArrayList<>();
+
+        // Parse the range into start and end coordinates
+        String[] parts = range.split(":");
+        if (parts.length != 2) {
+            throw new IllegalArgumentException("Invalid range format: " + range);
+        }
+
+        String start = parts[0];
+        String end = parts[1];
+
+        int startRow = getCellIndices(start)[0];
+        int startCol = getCellIndices(start)[1];
+        int endRow = getCellIndices(end)[0];
+        int endCol = getCellIndices(end)[1];
+        // Iterate through the range and collect cell values
+        for (int row = startRow; row <= endRow; row++) {
+            for (int col = startCol; col <= endCol; col++) {
+                Cell cell = sheet[row][col];
+                if (cell != null) {
+                    values.add(cell.getEffectiveValue());
+                }
+            }
+        }
+        return values;
+    }
+
 }
