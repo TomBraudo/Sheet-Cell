@@ -4,7 +4,7 @@ import api.EngineOptions;
 import engine.CellDTO;
 import engine.SheetDTO;
 import javafx.fxml.FXML;
-import javafx.geometry.Insets;
+import javafx.geometry.Bounds;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -12,17 +12,16 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.stage.FileChooser;
 
-import java.awt.event.ActionEvent;
 import java.util.List;
 
 public class SheetController {
 
-
     private EngineOptions engineOptions;
-    private boolean isSelectingRange = false;
-    private TextField activeCellField; // The currently edited cell field
-    private StringBuilder selectedRange = new StringBuilder(); // Holds the range string
 
+    private boolean isSelectingRange = false;
+    private TextField activeCellField; // Tracks the currently active cell for editing or range selection
+    private String startCell; // Tracks the starting cell for the range
+    private String endCell; // Tracks the ending cell for the range
 
     @FXML
     private GridPane gridPane;
@@ -38,7 +37,6 @@ public class SheetController {
         this.engineOptions = engineOptions;
         displaySheet(); // Immediately display the sheet
     }
-
 
     private void displaySheet() {
 
@@ -107,69 +105,165 @@ public class SheetController {
             }
         }
 
-// Remove debug grid lines
-        gridPane.setGridLinesVisible(false);
-
-
         // Remove debug grid lines
         gridPane.setGridLinesVisible(false);
     }
+
     private TextField createCellField(String cellName, String effectiveValue, int scaledColumnWidth, int scaledRowHeight) {
-        // Create a TextField for the cell
         TextField cellField = new TextField(effectiveValue == null ? "" : effectiveValue);
         cellField.setPrefSize(scaledColumnWidth, scaledRowHeight);
 
-        // Flag to track if the cell is in edit mode
-        final boolean[] isEditing = {false};
-
-        // Show the raw value and start editing when the user clicks on the cell
-        cellField.setOnMouseClicked(event -> {
-            if (!isEditing[0]) {
-                isEditing[0] = true;
-                String actualValue = engineOptions.getCellData(cellName).getOriginalValue();
-                cellField.setText(actualValue == null ? "" : actualValue);
-                cellField.requestFocus(); // Bring focus to the cell
-                cellField.selectAll(); // Select all text for easy editing
+        // Handle mouse press to start range selection
+        cellField.setOnMousePressed(event -> {
+            if (isSelectingRange) {
+                startCell = cellName; // Set the starting cell
+                endCell = cellName; // Initialize endCell to startCell
+                highlightRange(startCell, endCell); // Highlight the initial single cell
+            } else {
+                if (activeCellField != cellField) {
+                    // Enter single-cell editing mode only if the pressed cell is different from the currently active cell
+                    enterEditMode(cellField, cellName);
+                }
             }
         });
 
-        // Handle the user pressing Enter to finalize editing
-        cellField.setOnAction(event -> {
-            if (isEditing[0]) {
-                isEditing[0] = false;
-                finalizeEditing(cellField, cellName);
+        // Handle mouse drag to dynamically update the range
+        cellField.setOnMouseDragged(event -> {
+            if (isSelectingRange) {
+                endCell = calculateCellFromMousePosition(event.getSceneX(), event.getSceneY());
+                if (endCell != null) {
+                    highlightRange(startCell, endCell); // Highlight the range dynamically
+                }
             }
+        });
+
+        // Handle mouse release to finalize the range
+        cellField.setOnMouseReleased(event -> {
+            if (isSelectingRange) {
+                finalizeRangeSelection(); // Finalize the range selection
+            }
+        });
+
+        // Handle key press for range selection activation
+        cellField.setOnKeyPressed(event -> {
+            if (event.isControlDown()) {
+                isSelectingRange = true; // Enable range selection when Control is held
+                clearRangeHighlight(); // Prepare for a new range
+            }
+        });
+
+        // Handle key release for range selection deactivation
+        cellField.setOnKeyReleased(event -> {
+            if (!event.isControlDown() && isSelectingRange) {
+                isSelectingRange = false; // Disable range selection when Control is released
+            }
+        });
+
+        // Handle pressing Enter to finalize editing
+        cellField.setOnAction(event -> {
+            finalizeCellEditing(cellField, cellName);
         });
 
         // Handle focus loss to finalize editing
         cellField.focusedProperty().addListener((observable, oldValue, newValue) -> {
-            if (!newValue && isEditing[0]) { // Focus lost and editing was in progress
-                isEditing[0] = false;
-                finalizeEditing(cellField, cellName);
+            if (!newValue && !isSelectingRange) { // Focus lost
+                if (activeCellField == cellField) {
+                    finalizeCellEditing(cellField, cellName);
+                }
             }
         });
 
         return cellField;
     }
 
-    private void finalizeEditing(TextField cellField, String cellName) {
-        String newRawValue = cellField.getText(); // Get the raw value entered by the user
-        engineOptions.setCellValue(cellName, newRawValue); // Update the raw value
-        String newEffectiveValue = engineOptions.getCellData(cellName).getEffectiveValue(); // Recalculate the effective value
-        cellField.setText(newEffectiveValue == null ? "" : newEffectiveValue); // Show the updated effective value
-        updateDependentCells(cellName); // Update dependent cells
-        gridPane.requestFocus(); // Remove focus from the cell to simulate Excel-like behavior
+    private String calculateCellFromMousePosition(double mouseX, double mouseY) {
+        for (Node node : gridPane.getChildren()) {
+            if (node instanceof TextField) {
+                Bounds bounds = node.localToScene(node.getBoundsInLocal());
+                if (bounds.contains(mouseX, mouseY)) {
+                    int row = GridPane.getRowIndex(node) - 1; // Adjust to zero-based index
+                    int col = GridPane.getColumnIndex(node) - 1; // Adjust to zero-based index
+                    return (char) ('A' + col) + String.valueOf(row + 1); // Convert to cell name
+                }
+            }
+        }
+        return null;
     }
 
+    private void finalizeRangeSelection() {
+        // Determine the range based on startCell and endCell
+        String range = startCell + ":" + endCell;
+
+        // Insert the selected range into the active cell's text
+        if (activeCellField != null) {
+            activeCellField.setText(activeCellField.getText() + range);
+            activeCellField.requestFocus(); // Refocus on the active cell
+            activeCellField.selectEnd(); // Move the caret to the end of the text
+        }
+
+        // Clear the range and reset highlighting
+        startCell = null;
+        endCell = null;
+        clearRangeHighlight();
+    }
+
+    private void finalizeCellEditing(TextField cellField, String cellName) {
+        if (activeCellField == cellField && cellField.isEditable()) {
+            String newRawValue = cellField.getText(); // Get the edited value
+            engineOptions.setCellValue(cellName, newRawValue); // Update the cell in the engine
+            String newEffectiveValue = engineOptions.getCellData(cellName).getEffectiveValue(); // Get the recalculated value
+            cellField.setText(newEffectiveValue == null ? "" : newEffectiveValue); // Display the effective value
+            updateDependentCells(cellName); // Update dependent cells
+            cellField.setEditable(false); // Exit editing mode
+        }
+    }
+
+    private void enterEditMode(TextField cellField, String cellName) {
+        if (activeCellField != cellField || !cellField.isEditable()) {
+            activeCellField = cellField; // Track the active cell
+            String actualValue = engineOptions.getCellData(cellName).getOriginalValue();
+            cellField.setText(actualValue == null ? "" : actualValue); // Show the raw value
+            cellField.setEditable(true); // Enable editing mode
+            cellField.requestFocus(); // Focus on the cell
+            cellField.selectAll(); // Select all text for editing
+        }
+    }
+
+    private void highlightRange(String startCell, String endCell) {
+        int startRow = engineOptions.getCellData(startCell).getRowFromCellName();
+        int startCol = engineOptions.getCellData(startCell).getColFromCellName();
+        int endRow = engineOptions.getCellData(endCell).getRowFromCellName();
+        int endCol = engineOptions.getCellData(endCell).getColFromCellName();
+
+        for (int row = Math.min(startRow, endRow); row <= Math.max(startRow, endRow); row++) {
+            for (int col = Math.min(startCol, endCol); col <= Math.max(startCol, endCol); col++) {
+                for (Node node : gridPane.getChildren()) {
+                    if (GridPane.getRowIndex(node) == row + 1 && GridPane.getColumnIndex(node) == col + 1) {
+                        node.setStyle("-fx-background-color: lightblue; -fx-border-color: darkblue; -fx-border-width: 1px;"); // Highlight the cell
+                    }
+                }
+            }
+        }
+    }
+
+    private void clearRangeHighlight() {
+        for (Node node : gridPane.getChildren()) {
+            node.setStyle(""); // Reset style for all cells
+        }
+    }
+
+    @FXML
+    private void initialize() {
+        // Initialization logic, if necessary
+    }
 
 
     private void updateDependentCells(String cellName) {
         List<String> dependents = engineOptions.getDependents(cellName); // Get dependents from the engine
 
         for (String dependentCellName : dependents) {
-            CellDTO dependentCell = engineOptions.getCellData(dependentCellName);
-            int row = dependentCell.getRowFromCellName();
-            int col = dependentCell.getColFromCellName();
+            int row = engineOptions.getCellData(dependentCellName).getRowFromCellName();
+            int col = engineOptions.getCellData(dependentCellName).getColFromCellName();
 
             // Find the TextField in the GridPane
             for (Node node : gridPane.getChildren()) {

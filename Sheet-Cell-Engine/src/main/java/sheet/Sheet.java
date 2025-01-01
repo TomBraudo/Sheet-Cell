@@ -142,6 +142,15 @@ public class Sheet implements Serializable {
                 // Create the cell
                 sheet[row][colIndex] = new Cell(getCellName(row, colIndex), value, this);
             }
+
+            for (int i = 0; i < rows; i++) {
+                for (int j = 0; j < columns; j++) {
+                    if (sheet[i][j] == null) {
+                        sheet[i][j] = new Cell(getCellName(i, j), "", this);
+                    }
+                }
+            }
+
         } catch (Exception e) {
             throw new RuntimeException("Error creating sheet from file: " + filePath + "\n" + e.getMessage());
         }
@@ -223,6 +232,9 @@ public class Sheet implements Serializable {
 
     public CellDTO getCellData(String cellName) {
         int[] indices = getCellIndices(cellName);
+        if(sheet[indices[0]][indices[1]] == null) {
+            return null;
+        }
         return sheet[indices[0]][indices[1]].getCellData();
     }
 
