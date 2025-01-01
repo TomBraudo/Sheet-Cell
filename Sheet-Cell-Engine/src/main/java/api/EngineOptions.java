@@ -7,6 +7,7 @@ import sheet.Sheet;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.List;
 
 //The only class available for the UI layer, all requests come through here
 public class EngineOptions {
@@ -94,4 +95,7 @@ public class EngineOptions {
         }
     }
 
+    public List<String> getDependents(String cellName) {
+        return curSheet.getDependentsNames(cellName);
+    }
 }

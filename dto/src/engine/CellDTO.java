@@ -32,4 +32,12 @@ public class CellDTO {
     public List<String> getDependents() {
         return dependents;
     }
+    public int getRowFromCellName() {
+        return Integer.parseInt(location.substring(1)) - 1; // Extract the row index
+    }
+
+    public int getColFromCellName() {
+        return location.charAt(0) - 'A'; // Convert column letter to index
+    }
+
 }

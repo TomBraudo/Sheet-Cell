@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class Sheet implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -206,6 +207,18 @@ public class Sheet implements Serializable {
 
     DependencyGraph getDependencyGraph() {
         return dependencyGraph;
+    }
+
+    public List<String> getDependentsNames(String cellName) {
+        List<String> names = new ArrayList<>();
+        int[] indices = getCellIndices(cellName);
+        Cell cell = sheet[indices[0]][indices[1]];
+        Set<Cell> dependents = dependencyGraph.getDependents(cell);
+        for (Cell dependent : dependents) {
+            names.add(dependent.getLocation());
+        }
+
+        return names;
     }
 
     public CellDTO getCellData(String cellName) {
