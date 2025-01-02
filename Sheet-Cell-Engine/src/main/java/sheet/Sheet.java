@@ -7,9 +7,7 @@ import org.w3c.dom.*;
 import javax.xml.parsers.*;
 import java.io.File;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class Sheet implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -24,6 +22,10 @@ public class Sheet implements Serializable {
     private final ArrayList<SheetDTO> versions = new ArrayList<>();
     private int currentVersion;
     private int curNumberOfCellsChanged;
+
+
+
+
 
     // Constructor to create a sheet from a file
     public Sheet(String filePath) {
@@ -113,6 +115,17 @@ public class Sheet implements Serializable {
                 }
             } else {
                 throw new RuntimeException("STL-Layout element is missing.");
+            }
+
+            NodeList rangesList = root.getElementsByTagName("STL-Range");
+            for (int i = 0; i < rangesList.getLength(); i++) {
+                Element range = (Element) rangesList.item(i);
+                String rangeName = range.getAttribute("name");
+                NodeList boundariesList = range.getElementsByTagName("STL-Boundaries");
+                Element boundary = (Element) boundariesList.item(0);
+                String from = boundary.getAttribute("from");
+                String to = boundary.getAttribute("to");
+                FunctionRegistry.addRangeName(rangeName, from, to);
             }
 
             // Initialize the sheet

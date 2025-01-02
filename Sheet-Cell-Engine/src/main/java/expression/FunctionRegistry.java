@@ -9,6 +9,7 @@ import java.util.Map;
 public class FunctionRegistry {
     private static final Map<String, FunctionType> STRING_TO_TYPE = new HashMap<>();
     private static final Map<FunctionType, FunctionHandler> TYPE_TO_FUNCTION = new HashMap<>();
+    private static final Map<String, String> rangeNameToRange = new HashMap<>();
     private static Sheet sheet; // Reference to the current sheet
 
     static {
@@ -87,6 +88,9 @@ public class FunctionRegistry {
             }
 
             String range = args[0].toString();
+            if(rangeNameToRange.containsKey(range)) {
+                range = rangeNameToRange.get(range);
+            }
             if (sheet == null) {
                 throw new IllegalStateException("Sheet is not initialized");
             }
@@ -102,6 +106,9 @@ public class FunctionRegistry {
             }
 
             String range = args[0].toString();
+            if(rangeNameToRange.containsKey(range)) {
+                range = rangeNameToRange.get(range);
+            }
             if (sheet == null) {
                 throw new IllegalStateException("Sheet is not initialized");
             }
@@ -166,6 +173,11 @@ public class FunctionRegistry {
             throw new IllegalArgumentException("Expected an integer value but got: " + value);
         }
         return (int) value;
+    }
+
+    public static void addRangeName(String rangeName, String from, String to) {
+        String validRange = from + ":" + to;
+        rangeNameToRange.put(rangeName, validRange);
     }
 
     @FunctionalInterface
