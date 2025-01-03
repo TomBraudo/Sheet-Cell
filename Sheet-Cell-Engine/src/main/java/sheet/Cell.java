@@ -92,12 +92,20 @@ class Cell implements Serializable {
 
 
     private void addDependencies(String inputValue, DependencyGraph graph) {
+        // Pattern for single cell references
         String refPattern = "\\{REF,\\s*([A-Z]\\d+)\\}";
-        Pattern p = Pattern.compile(refPattern);
-        Matcher m = p.matcher(inputValue);
+        // Pattern for range functions (SUM and AVERAGE)
+        String rangePattern = "\\{(SUM|AVERAGE),\\s*([A-Z]\\d+):([A-Z]\\d+)\\}";
 
-        while (m.find()) {
-            String ref = m.group(1);
+        Pattern singleCellPattern = Pattern.compile(refPattern);
+        Pattern rangeFunctionPattern = Pattern.compile(rangePattern);
+
+        Matcher singleCellMatcher = singleCellPattern.matcher(inputValue);
+        Matcher rangeFunctionMatcher = rangeFunctionPattern.matcher(inputValue);
+
+        // Handle single cell references
+        while (singleCellMatcher.find()) {
+            String ref = singleCellMatcher.group(1);
             Cell referencedCell = owner.getCell(ref);
             if (referencedCell != null) {
                 graph.addDependency(this, referencedCell);
@@ -105,9 +113,47 @@ class Cell implements Serializable {
                 throw new IllegalArgumentException("Referenced cell " + ref + " does not exist.");
             }
         }
+
+        // Handle range functions
+        while (rangeFunctionMatcher.find()) {
+            String function = rangeFunctionMatcher.group(1); // SUM or AVERAGE
+            String startCell = rangeFunctionMatcher.group(2);
+            String endCell = rangeFunctionMatcher.group(3);
+
+            // Resolve the range of cells
+            List<Cell> rangeCells = getCellsInRange(startCell, endCell);
+            if (rangeCells != null && !rangeCells.isEmpty()) {
+                for (Cell cell : rangeCells) {
+                    graph.addDependency(this, cell);
+                }
+            } else {
+                throw new IllegalArgumentException(
+                        "Invalid range " + startCell + ":" + endCell + " for function " + function
+                );
+            }
+        }
     }
 
-        private void computeEffectiveValue() {
+    public List<Cell> getCellsInRange(String startCell, String endCell) {
+        List<Cell> cells = new ArrayList<>();
+
+        char startCellCol = startCell.charAt(0);
+        char endCellCol = endCell.charAt(0);
+        int startCellRow = Integer.parseInt(String.valueOf(startCell.charAt(1)));
+        int endCellRow = Integer.parseInt(String.valueOf(endCell.charAt(1)));
+
+        for (char col = startCellCol; col <= endCellCol; col++) {
+            for (int row = startCellRow; row <= endCellRow; row++) {
+                String cellName = String.valueOf(col) + String.valueOf(row);
+                cells.add(owner.getCell(cellName));
+            }
+        }
+
+        return cells;
+    }
+
+
+    private void computeEffectiveValue() {
         if (value instanceof Expression) {
             this.effectiveValue = ((Expression) value).evaluate();
         }
@@ -117,12 +163,14 @@ class Cell implements Serializable {
     }
 
     private void notifyDependents(DependencyGraph graph) {
+        System.out.println("notifying Dependents");
         for (Cell dependent : graph.getDependents(this)) {
             dependent.computeEffectiveValue();
         }
     }
 
     private Object parseValue(String inputValue) {
+
         try {
             if (isExpression(inputValue)) {
                 return ExpressionParser.parseExpression(inputValue);

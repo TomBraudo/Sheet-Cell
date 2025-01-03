@@ -232,10 +232,12 @@ public class SheetController {
 
     private void finalizeCellEditing(TextField cellField, String cellName) {
         if (activeCellField == cellField && cellField.isEditable()) {
+            System.out.println("Finalizing cell " + cellName);
             String newRawValue = cellField.getText(); // Get the edited value
             engineOptions.setCellValue(cellName, newRawValue); // Update the cell in the engine
             String newEffectiveValue = engineOptions.getCellData(cellName).getEffectiveValue(); // Get the recalculated value
             cellField.setText(newEffectiveValue == null ? "" : newEffectiveValue); // Display the effective value
+            System.out.println("Updating Dependent cells");
             updateDependentCells(cellName); // Update dependent cells
             cellField.setEditable(false); // Exit editing mode
         }
@@ -296,6 +298,7 @@ public class SheetController {
 
             // Find the TextField in the GridPane
             for (Node node : gridPane.getChildren()) {
+                System.out.println("Updating Dependent cell " + dependentCellName);
                 if (GridPane.getRowIndex(node) == row + 1 && GridPane.getColumnIndex(node) == col + 1) {
                     if (node instanceof TextField) {
                         TextField dependentField = (TextField) node;

@@ -5,6 +5,7 @@ import sheet.Sheet;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class FunctionRegistry {
     private static final Map<String, FunctionType> STRING_TO_TYPE = new HashMap<>();
@@ -156,41 +157,54 @@ public class FunctionRegistry {
             } catch (Exception e) {
                 return ErrorType.UNDEFINED;
             }
-
         });
 
-        TYPE_TO_FUNCTION.put(FunctionType.SUM, (args) -> {
+        TYPE_TO_FUNCTION.put(FunctionType.SUM, (Object[] args) -> {
             try {
                 String range = args[0].toString();
-                if(rangeNameToRange.containsKey(range)) {
+                if (rangeNameToRange.containsKey(range)) {
                     range = rangeNameToRange.get(range);
                 }
 
                 return sheet.resolveRange(range).stream()
-                        .mapToDouble(FunctionRegistry::toDouble) // Convert all values to double
+                        .map(value -> {
+                            try {
+                                return FunctionRegistry.toDouble(value);
+                            } catch (Exception e) {
+                                return null; // Return null for non-numerical values
+                            }
+                        })
+                        .filter(Objects::nonNull) // Exclude null values (non-numerical ones)
+                        .mapToDouble(Double::doubleValue) // Convert to double
                         .sum(); // Sum them up
             } catch (Exception e) {
                 return ErrorType.NaN;
             }
-
         });
 
-        TYPE_TO_FUNCTION.put(FunctionType.AVERAGE, (args) -> {
+        TYPE_TO_FUNCTION.put(FunctionType.AVERAGE, (Object[] args) -> {
             try {
                 String range = args[0].toString();
-                if(rangeNameToRange.containsKey(range)) {
+                if (rangeNameToRange.containsKey(range)) {
                     range = rangeNameToRange.get(range);
                 }
 
                 return sheet.resolveRange(range).stream()
-                        .mapToDouble(FunctionRegistry::toDouble) // Convert all values to double
-                        .average() // Compute the average
-                        .orElse(0.0); // Return 0 if the range is empty
+                        .map(value -> {
+                            try {
+                                return FunctionRegistry.toDouble(value);
+                            } catch (Exception e) {
+                                return null; // Return null for non-numerical values
+                            }
+                        })
+                        .filter(Objects::nonNull) // Exclude null values (non-numerical ones)
+                        .mapToDouble(Double::doubleValue) // Convert to double
+                        .average();// Compute the average
             } catch (Exception e) {
                 return ErrorType.NaN;
             }
-
         });
+
 
         TYPE_TO_FUNCTION.put(FunctionType.PERCENT, (args) -> {
             try {
