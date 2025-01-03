@@ -11,5 +11,12 @@ public enum FunctionType {
     REF,
     SUM,
     AVERAGE,
-    PERCENT;
+    PERCENT,
+    EQUAL,
+    NOT,
+    OR,
+    AND,
+    BIGGER,
+    LESS,
+    IF;
 }

@@ -12,7 +12,9 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.stage.FileChooser;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class SheetController {
 
@@ -28,11 +30,8 @@ public class SheetController {
     @FXML
     private Button SaveStateBtn;
 
-    /**
-     * Sets the EngineOptions instance for this controller.
-     *
-     * @param engineOptions The EngineOptions instance to use.
-     */
+    private final Map<String, Node> cellMap = new HashMap<>(); // Map to store all cells by their name
+
     public void setEngineOptions(EngineOptions engineOptions) {
         this.engineOptions = engineOptions;
         displaySheet(); // Immediately display the sheet
@@ -72,8 +71,9 @@ public class SheetController {
         int scaledColumnWidth = (int) (originalColumnWidth * scaleFactor);
         int scaledRowHeight = (int) (originalRowHeight * scaleFactor);
 
-        // Clear previous content in the GridPane
+        // Clear previous content in the GridPane and Map
         gridPane.getChildren().clear();
+        cellMap.clear();
 
         // Add column titles (letters)
         for (int col = 0; col < data[0].length; col++) {
@@ -102,6 +102,8 @@ public class SheetController {
                 // Create and add the TextField
                 TextField cellField = createCellField(cellName, effectiveValue, scaledColumnWidth, scaledRowHeight);
                 gridPane.add(cellField, col + 1, row + 1);
+
+                cellMap.put(cellName, cellField);
             }
         }
 
@@ -190,9 +192,30 @@ public class SheetController {
         return null;
     }
 
+    private String getCorrectRange(){
+        // Parse the rows and columns
+        char startColumn = startCell.charAt(0); // First character for the column
+        char endColumn = endCell.charAt(0);
+
+        int startRow = Integer.parseInt(startCell.substring(1)); // Remaining characters for the row
+        int endRow = Integer.parseInt(endCell.substring(1));
+
+        // Calculate the top-left and bottom-right corners
+        char minColumn = (char) Math.min(startColumn, endColumn); // Smaller column letter
+        char maxColumn = (char) Math.max(startColumn, endColumn); // Larger column letter
+
+        int minRow = Math.min(startRow, endRow); // Smaller row number
+        int maxRow = Math.max(startRow, endRow); // Larger row number
+
+        // Construct the range
+        String minCell = minColumn + String.valueOf(minRow);
+        String maxCell = maxColumn + String.valueOf(maxRow);
+        return minCell + ":" + maxCell;
+    }
+
     private void finalizeRangeSelection() {
         // Determine the range based on startCell and endCell
-        String range = startCell + ":" + endCell;
+        String range = getCorrectRange();
 
         // Insert the selected range into the active cell's text
         if (activeCellField != null) {
@@ -235,16 +258,22 @@ public class SheetController {
         int endRow = engineOptions.getCellData(endCell).getRowFromCellName();
         int endCol = engineOptions.getCellData(endCell).getColFromCellName();
 
-        for (int row = Math.min(startRow, endRow); row <= Math.max(startRow, endRow); row++) {
-            for (int col = Math.min(startCol, endCol); col <= Math.max(startCol, endCol); col++) {
-                for (Node node : gridPane.getChildren()) {
-                    if (GridPane.getRowIndex(node) == row + 1 && GridPane.getColumnIndex(node) == col + 1) {
-                        node.setStyle("-fx-background-color: lightblue; -fx-border-color: darkblue; -fx-border-width: 1px;"); // Highlight the cell
-                    }
-                }
+        for (Map.Entry<String, Node> entry : cellMap.entrySet()) {
+            String cellName = entry.getKey();
+            Node node = entry.getValue();
+
+            int cellRow = engineOptions.getCellData(cellName).getRowFromCellName();
+            int cellCol = engineOptions.getCellData(cellName).getColFromCellName();
+
+            if (cellRow >= Math.min(startRow, endRow) && cellRow <= Math.max(startRow, endRow)
+                    && cellCol >= Math.min(startCol, endCol) && cellCol <= Math.max(startCol, endCol)) {
+                node.setStyle("-fx-background-color: lightblue; -fx-border-color: darkblue; -fx-border-width: 1px;");
+            } else {
+                node.setStyle("");
             }
         }
     }
+
 
     private void clearRangeHighlight() {
         for (Node node : gridPane.getChildren()) {

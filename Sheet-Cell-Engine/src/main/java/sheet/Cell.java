@@ -1,5 +1,6 @@
 package sheet;
 
+import expression.ErrorType;
 import expression.Expression;
 import expression.ExpressionParser;
 import engine.CellDTO;
@@ -106,10 +107,11 @@ class Cell implements Serializable {
         }
     }
 
-    private void computeEffectiveValue() {
+        private void computeEffectiveValue() {
         if (value instanceof Expression) {
             this.effectiveValue = ((Expression) value).evaluate();
-        } else {
+        }
+        else {
             this.effectiveValue = value;
         }
     }
