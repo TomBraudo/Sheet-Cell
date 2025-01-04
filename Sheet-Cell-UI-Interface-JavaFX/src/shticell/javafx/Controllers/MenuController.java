@@ -2,10 +2,12 @@ package shticell.javafx.Controllers;
 
 import api.EngineOptions;
 import javafx.concurrent.Task;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
@@ -25,7 +27,7 @@ public class MenuController {
 
     @FXML
     public void loadSheetFromXML() {
-        runTaskWithProgress(new ExtensionFilter("XML files", "*.xml"), engineOptions::SetNewSheet);
+        runTaskWithProgress(new ExtensionFilter("XML files", "*.xml"), engineOptions::setNewSheet);
     }
 
     @FXML
@@ -132,6 +134,46 @@ public class MenuController {
         progressIndicator.progressProperty().bind(task.progressProperty());
         progressIndicator.setVisible(true);
     }
+
+    @FXML
+    public void openEmptySheetWindow(ActionEvent actionEvent) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("fxml/emptySheetInputWindow.fxml"));
+            Parent root = loader.load();
+            Stage stage = new Stage();
+            stage.setScene(new Scene(root));
+            stage.setTitle("Create New Sheet");
+
+            // Set the callback for receiving sheet dimensions and properties
+            EmptySheetInputWindowController controller = loader.getController();
+            controller.setCallback(values -> {
+                try {
+                    // Create a new sheet using the provided dimensions
+                    engineOptions.setNewSheet(values[0], values[1], values[2], values[3]);
+
+                    // Open the sheet window and display the blank sheet
+                    openSheetWindow(engineOptions);
+                } catch (Exception e) {
+                    showError("Error", "Failed to create a new sheet: " + e.getMessage());
+                }
+            });
+
+            stage.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+            showError("Error", "Failed to open the sheet creation window.");
+        }
+    }
+
+
+    private void showError(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
 
     @FunctionalInterface
     private interface TaskAction {
