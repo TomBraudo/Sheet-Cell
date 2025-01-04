@@ -25,16 +25,12 @@ public class MenuController {
 
     @FXML
     public void loadSheetFromXML() {
-        runTaskWithProgress(new ExtensionFilter("XML files", "*.xml"), filePath -> {
-            engineOptions.SetNewSheet(filePath);
-        });
+        runTaskWithProgress(new ExtensionFilter("XML files", "*.xml"), engineOptions::SetNewSheet);
     }
 
     @FXML
     public void loadExistingState() {
-        runTaskWithProgress(new ExtensionFilter("State files", "*.ser", "*.state"), filePath -> {
-            engineOptions.loadState(filePath);
-        });
+        runTaskWithProgress(new ExtensionFilter("State files", "*.ser", "*.state"), engineOptions::loadState);
     }
 
     private void runTaskWithProgress(ExtensionFilter extensionFilter, TaskAction taskAction) {
@@ -64,8 +60,15 @@ public class MenuController {
                 @Override
                 protected void failed() {
                     progressIndicator.setVisible(false); // Hide progress indicator
-                    System.err.println("Task failed: " + getException().getMessage());
-                    getException().printStackTrace();
+                    // Show error alert with exception message
+                    javafx.application.Platform.runLater(() -> {
+                        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
+                        alert.setTitle("Task Failed");
+                        alert.setHeaderText("An error occurred while processing the task.");
+                        alert.setContentText(getException().getMessage());
+
+                        alert.showAndWait();
+                    });
                 }
             };
 
@@ -73,6 +76,7 @@ public class MenuController {
             new Thread(task).start();
         } catch (Exception e) {
             System.err.println("Failed to process file: " + e.getMessage());
+
         }
     }
 
