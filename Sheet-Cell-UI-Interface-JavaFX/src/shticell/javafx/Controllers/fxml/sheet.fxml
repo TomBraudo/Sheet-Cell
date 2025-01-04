@@ -7,4 +7,7 @@
 <VBox xmlns:fx="http://javafx.com/fxml" fx:controller="shticell.javafx.Controllers.SheetController">
     <GridPane fx:id="gridPane" styleClass="grid-pane" />
     <Button fx:id="SaveStateBtn" text="Save State" onAction="#saveStateBtnOnAction"/>
+    <Button fx:id="SaveVersionBtn" text="Save Version" onAction="#saveVersion"/>
+    <Button fx:id="ShowVersionsBtn" text="Show Version" onAction="#openVersionsWindow"/>
+
 </VBox>

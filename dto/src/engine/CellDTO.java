@@ -17,6 +17,14 @@ public class CellDTO {
         this.dependentOn = dependentOn;
         this.dependents = dependents;
     }
+
+    public CellDTO(CellDTO cellDTO) {
+        this.location = cellDTO.getLocation();
+        this.originalValue = cellDTO.getOriginalValue();
+        this.effectiveValue = cellDTO.getEffectiveValue();
+        this.dependentOn = cellDTO.getDependentOn();
+        this.dependents = cellDTO.getDependents();
+    }
     public String getLocation() {
         return location;
     }

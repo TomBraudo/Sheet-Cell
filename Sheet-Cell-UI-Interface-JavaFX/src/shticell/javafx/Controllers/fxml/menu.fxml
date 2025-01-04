@@ -5,7 +5,7 @@
 <?import javafx.scene.control.ProgressBar?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox alignment="center" prefHeight="198.0" prefWidth="388.0" spacing="20" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/23.0.1" fx:controller="shticell.javafx.Controllers.MenuController">
+<VBox alignment="center" prefHeight="177.0" prefWidth="351.0" spacing="20" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="shticell.javafx.Controllers.MenuController">
     <Label prefHeight="42.0" prefWidth="242.0" style="-fx-font-size: 20px; -fx-font-weight: bold;" text="Welcome to Sheet Viewer" />
     <Button onAction="#loadSheetFromXML" text="Load Sheet from XML" />
     <Button onAction="#loadExistingState" text="Load Existing State" />

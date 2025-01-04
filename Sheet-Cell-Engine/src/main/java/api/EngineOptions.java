@@ -22,13 +22,6 @@ public class EngineOptions {
         return curSheet.getCellData(cellName);
     }
 
-    //Method that returns the current sheet (or null if not yet created a sheet)
-    public SheetDTO getCurSheet() {
-        if(curSheet == null) {
-            return null;
-        }
-        return curSheet.getCurrentVersion();
-    }
 
     //Method that sets a cell by location to a new value
     public void setCellValue(String cellName, String value) {
@@ -46,7 +39,10 @@ public class EngineOptions {
     }
 
     //Method that announce to the engine that the user ended editing the file, and it should save a version
-    public void endEditingSession(){ curSheet.endEditingSession();}
+    public void endEditingSession()
+    {
+        curSheet.endEditingSession();
+    }
 
     public void saveState(String filePath){
 
@@ -97,5 +93,12 @@ public class EngineOptions {
 
     public List<String> getDependents(String cellName) {
         return curSheet.getDependentsNames(cellName);
+    }
+    public List<String> getDependentOn(String cellName) {
+        return curSheet.getDependentOn(cellName);
+    }
+
+    public void loadVersion(int version) {
+        curSheet.loadFromVersion(getVersionsData().get(version));
     }
 }

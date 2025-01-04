@@ -91,6 +91,7 @@ class Cell implements Serializable {
     }
 
 
+
     private void addDependencies(String inputValue, DependencyGraph graph) {
         // Pattern for single cell references
         String refPattern = "\\{REF,\\s*([A-Z]\\d+)\\}";
@@ -163,7 +164,6 @@ class Cell implements Serializable {
     }
 
     private void notifyDependents(DependencyGraph graph) {
-        System.out.println("notifying Dependents");
         for (Cell dependent : graph.getDependents(this)) {
             dependent.computeEffectiveValue();
         }

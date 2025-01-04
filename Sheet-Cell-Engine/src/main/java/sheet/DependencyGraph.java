@@ -38,6 +38,9 @@ class DependencyGraph implements Serializable {
         return dependencies.getOrDefault(cell, new HashSet<>());
     }
 
+    public Map<Cell, Set<Cell>> getDependenciesGraph() {
+        return dependencies;
+    }
 
     public List<Cell> hasCircularDependency(Cell cell) {
         // Use a stack to track the current path of visited cells
@@ -82,4 +85,7 @@ class DependencyGraph implements Serializable {
         return false;
     }
 
+    public void clear() {
+        dependencies.clear();
+    }
 }

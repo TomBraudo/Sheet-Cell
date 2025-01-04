@@ -96,6 +96,7 @@ public class MenuController {
         }
     }
 
+
     private void openSheetWindow(EngineOptions engineOptions) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("fxml/sheet.fxml"));

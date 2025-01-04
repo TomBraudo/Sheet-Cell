@@ -3,6 +3,7 @@ package shticell.javafx.Controllers;
 import api.EngineOptions;
 import engine.CellDTO;
 import engine.SheetDTO;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Bounds;
 import javafx.scene.Node;
@@ -11,7 +12,9 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,7 +47,7 @@ public class SheetController {
             return;
         }
 
-        SheetDTO sheetDTO = engineOptions.getCurSheet();
+        SheetDTO sheetDTO = engineOptions.getVersion(0);
         if (sheetDTO == null) {
             System.out.println("No sheet available.");
             return;
@@ -106,6 +109,8 @@ public class SheetController {
                 cellMap.put(cellName, cellField);
             }
         }
+
+
 
         // Remove debug grid lines
         gridPane.setGridLinesVisible(false);
@@ -213,6 +218,28 @@ public class SheetController {
         return minCell + ":" + maxCell;
     }
 
+    private void highlightDependencies(String cellName) {
+        clearRangeHighlight(); // Clear any existing highlights
+
+        // Highlight cells this cell depends on (in blue)
+        List<String> dependencies = engineOptions.getDependentOn(cellName);
+        for (String dependency : dependencies) {
+            Node node = cellMap.get(dependency);
+            if (node != null) {
+                node.setStyle("-fx-background-color: lightblue; -fx-border-color: darkblue; -fx-border-width: 1px;");
+            }
+        }
+
+        // Highlight cells that depend on this cell (in green)
+        List<String> dependents = engineOptions.getDependents(cellName);
+        for (String dependent : dependents) {
+            Node node = cellMap.get(dependent);
+            if (node != null) {
+                node.setStyle("-fx-background-color: lightgreen; -fx-border-color: darkgreen; -fx-border-width: 1px;");
+            }
+        }
+    }
+
     private void finalizeRangeSelection() {
         // Determine the range based on startCell and endCell
         String range = getCorrectRange();
@@ -232,20 +259,20 @@ public class SheetController {
 
     private void finalizeCellEditing(TextField cellField, String cellName) {
         if (activeCellField == cellField && cellField.isEditable()) {
-            System.out.println("Finalizing cell " + cellName);
             String newRawValue = cellField.getText(); // Get the edited value
             engineOptions.setCellValue(cellName, newRawValue); // Update the cell in the engine
             String newEffectiveValue = engineOptions.getCellData(cellName).getEffectiveValue(); // Get the recalculated value
             cellField.setText(newEffectiveValue == null ? "" : newEffectiveValue); // Display the effective value
-            System.out.println("Updating Dependent cells");
             updateDependentCells(cellName); // Update dependent cells
             cellField.setEditable(false); // Exit editing mode
+            clearRangeHighlight();
         }
     }
 
     private void enterEditMode(TextField cellField, String cellName) {
         if (activeCellField != cellField || !cellField.isEditable()) {
             activeCellField = cellField; // Track the active cell
+            highlightDependencies(cellName);
             String actualValue = engineOptions.getCellData(cellName).getOriginalValue();
             cellField.setText(actualValue == null ? "" : actualValue); // Show the raw value
             cellField.setEditable(true); // Enable editing mode
@@ -298,7 +325,6 @@ public class SheetController {
 
             // Find the TextField in the GridPane
             for (Node node : gridPane.getChildren()) {
-                System.out.println("Updating Dependent cell " + dependentCellName);
                 if (GridPane.getRowIndex(node) == row + 1 && GridPane.getColumnIndex(node) == col + 1) {
                     if (node instanceof TextField) {
                         TextField dependentField = (TextField) node;
@@ -319,4 +345,44 @@ public class SheetController {
         String path = MenuController.getPathFromFileChooser(new FileChooser.ExtensionFilter("State Files","*.state","*.ser"));
         engineOptions.saveState(path);
     }
+
+    public void saveVersion(ActionEvent actionEvent) {
+        engineOptions.endEditingSession();
+    }
+
+    public void openVersionsWindow(ActionEvent actionEvent) {
+        if (engineOptions == null) {
+            System.out.println("EngineOptions is not set!");
+            return;
+        }
+
+        // Retrieve all versions from the engine
+        List<SheetDTO> versions = engineOptions.getVersionsData();
+        if (versions == null || versions.isEmpty()) {
+            System.out.println("No versions available.");
+            return;
+        }
+
+        Stage currentStage = (Stage) gridPane.getScene().getWindow();
+
+        // Create and display the VersionsWindow
+        VersionsWindow versionsWindow = new VersionsWindow(new ArrayList<>(versions), selectedVersion -> {
+            // Callback to handle loading the selected version
+            engineOptions.loadVersion(selectedVersion.getVersion());
+            refreshAllCells();
+        });
+
+        versionsWindow.display(currentStage);
+    }
+
+    private void refreshAllCells() {
+        for (Map.Entry<String, Node> entry : cellMap.entrySet()) {
+            String cellName = entry.getKey();
+            TextField cellField = (TextField) entry.getValue();
+            cellField.setText(engineOptions.getCellData(cellName).getEffectiveValue());
+        }
+    }
+
+
+
 }
