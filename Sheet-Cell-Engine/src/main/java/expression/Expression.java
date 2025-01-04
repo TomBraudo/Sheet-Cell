@@ -4,38 +4,70 @@ import java.io.Serializable;
 import java.lang.StringBuilder;
 
 /**
-* Represents a generic expression that can be evaluated to produce a result.
-* Supports different types of functions such as mathematical operations and string manipulations.
-*/
+ * Represents a generic expression that can be evaluated to produce a result.
+ * Supports different types of functions such as mathematical operations and string manipulations.
+ */
 public class Expression implements Serializable {
     private static final long serialVersionUID = 1L;
     private final FunctionType functionType; // The function type
-    private final Object[] arguments; //The arguments provided to the function
+    private final Object[] arguments; // The arguments provided to the function
+
+    private boolean isValid = true;
+    private ErrorType errorType; // NaN, UNDEFINED, UNKNOWN
+
+    // Getter and setter for error state
+    public void setError(ErrorType errorType) {
+        this.isValid = false;
+        this.errorType = errorType;
+    }
+
+    public boolean isValid() {
+        return isValid;
+    }
+
+    public ErrorType getErrorType() {
+        return errorType;
+    }
 
     public Expression(String functionName, Object... arguments) {
         this.functionType = FunctionRegistry.getFunctionType(functionName);
         this.arguments = arguments;
     }
 
-    //Evaluates the expression while evaluating all the nested expressions as well
+    /**
+     * Evaluates the expression while evaluating all the nested expressions as well.
+     *
+     * @return The result of the evaluation or an error type if invalid.
+     */
     public Object evaluate() {
         Object[] evaluatedArgs = new Object[arguments.length];
+
         for (int i = 0; i < arguments.length; i++) {
-            evaluatedArgs[i] = parseArgument(arguments[i]);
+            evaluatedArgs[i] = evaluateArgument(arguments[i]);
+
+            // Check if the argument evaluation resulted in an error
+            if (evaluatedArgs[i] instanceof ErrorType) {
+                setError((ErrorType) evaluatedArgs[i]);
+                return errorType;
+            }
         }
-        return FunctionRegistry.getFunctionHandler(functionType).execute(evaluatedArgs);
+
+        Object result = FunctionRegistry.getFunctionHandler(functionType).execute(evaluatedArgs);
+        if (result instanceof ErrorType) {
+            setError((ErrorType) result);
+            return errorType;
+        } else {
+            return result;
+        }
     }
 
-
-    private Object parseArgument(Object arg) {
-        if (arg instanceof Number || arg instanceof String) {
+    private Object evaluateArgument(Object arg) {
+        if (arg instanceof Number || arg instanceof Boolean || arg instanceof String) {
             return arg;
         } else if (arg instanceof Expression) {
             return ((Expression) arg).evaluate();
-        } else if (arg instanceof String) {
-            return ExpressionParser.parseExpression((String) arg).evaluate();
         } else {
-            throw new IllegalArgumentException("Invalid argument type: " + arg.getClass().getName());
+            return ErrorType.UNDEFINED;
         }
     }
 

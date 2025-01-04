@@ -17,6 +17,14 @@ public class CellDTO {
         this.dependentOn = dependentOn;
         this.dependents = dependents;
     }
+
+    public CellDTO(CellDTO cellDTO) {
+        this.location = cellDTO.getLocation();
+        this.originalValue = cellDTO.getOriginalValue();
+        this.effectiveValue = cellDTO.getEffectiveValue();
+        this.dependentOn = cellDTO.getDependentOn();
+        this.dependents = cellDTO.getDependents();
+    }
     public String getLocation() {
         return location;
     }
@@ -32,4 +40,12 @@ public class CellDTO {
     public List<String> getDependents() {
         return dependents;
     }
+    public int getRowFromCellName() {
+        return Integer.parseInt(location.substring(1)) - 1; // Extract the row index
+    }
+
+    public int getColFromCellName() {
+        return location.charAt(0) - 'A'; // Convert column letter to index
+    }
+
 }

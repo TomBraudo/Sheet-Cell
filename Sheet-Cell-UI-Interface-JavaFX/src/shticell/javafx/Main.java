@@ -6,6 +6,8 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.util.Objects;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Main extends Application {
     @Override
@@ -22,6 +24,9 @@ public class Main extends Application {
     }
 
     public static void main(String[] args) {
+        Logger rootLogger = Logger.getLogger("");
+        rootLogger.setLevel(Level.SEVERE);
+        rootLogger.getHandlers()[0].setLevel(Level.SEVERE);
         launch(args);
     }
 }

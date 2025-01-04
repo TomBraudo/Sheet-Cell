@@ -7,7 +7,7 @@ import org.w3c.dom.*;
 import javax.xml.parsers.*;
 import java.io.File;
 import java.io.Serializable;
-import java.util.ArrayList;
+import java.util.*;
 
 public class Sheet implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -18,17 +18,12 @@ public class Sheet implements Serializable {
     private int columns;
     private int rowsHeight;
     private int columnWidth;
-
     private final ArrayList<SheetDTO> versions = new ArrayList<>();
-    private int currentVersion;
-    private int curNumberOfCellsChanged;
 
     // Constructor to create a sheet from a file
     public Sheet(String filePath) {
         createSheet(filePath);
-        currentVersion = 1;
-        curNumberOfCellsChanged = 0;
-        versions.add(new SheetDTO(currentVersion++, curNumberOfCellsChanged, getEffectiveCellsData(), columnWidth, rowsHeight));
+        endEditingSession();
     }
 
     public ArrayList<SheetDTO> getVersionsData() {
@@ -39,30 +34,33 @@ public class Sheet implements Serializable {
         return versions.get(requestedVersion);
     }
 
-    public SheetDTO getCurrentVersion(){
-        return new SheetDTO(currentVersion, curNumberOfCellsChanged, getEffectiveCellsData(), columnWidth, rowsHeight);
-    }
 
     public void endEditingSession(){
-        if(curNumberOfCellsChanged > 0) {
-            versions.add(new SheetDTO(currentVersion++, curNumberOfCellsChanged, getEffectiveCellsData(), columnWidth, rowsHeight));
-            curNumberOfCellsChanged = 0;
-        }
-    }
-
-    private String[][] getEffectiveCellsData(){
-        String[][] effectiveCellData = new String[rows][columns];
+        CellDTO[][] cellsDTO = new CellDTO[rows][columns];
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < columns; j++) {
-                if(sheet[i][j] != null)
-                    effectiveCellData[i][j] = sheet[i][j].getEffectiveValue().toString();
-                else
-                    effectiveCellData[i][j] = "";
+                Cell cell = sheet[i][j];
+                cellsDTO[i][j] = new CellDTO(cell.getCellData());
             }
         }
 
-        return effectiveCellData;
+        versions.add(new SheetDTO(sheetName,versions.size(), cellsDTO, columnWidth, rowsHeight, saveDependenciesGraph()));
     }
+
+    private Map<CellDTO, Set<CellDTO>> saveDependenciesGraph(){
+        Map<CellDTO, Set<CellDTO>> savedDependenciesGraph = new HashMap<>();
+        Map<Cell, Set<Cell>> currentDependenciesGraph = dependencyGraph.getDependenciesGraph();
+        for (Map.Entry<Cell, Set<Cell>> entry : currentDependenciesGraph.entrySet()) {
+            CellDTO cellData = entry.getKey().getCellData();
+            savedDependenciesGraph.put(cellData, new HashSet<>());
+            for (Cell cell : entry.getValue()) {
+                savedDependenciesGraph.get(cellData).add(cell.getCellData());
+            }
+        }
+
+        return savedDependenciesGraph;
+    }
+
 
     // Method to initialize the sheet from an XML file
     private void createSheet(String filePath) {
@@ -113,6 +111,17 @@ public class Sheet implements Serializable {
                 throw new RuntimeException("STL-Layout element is missing.");
             }
 
+            NodeList rangesList = root.getElementsByTagName("STL-Range");
+            for (int i = 0; i < rangesList.getLength(); i++) {
+                Element range = (Element) rangesList.item(i);
+                String rangeName = range.getAttribute("name");
+                NodeList boundariesList = range.getElementsByTagName("STL-Boundaries");
+                Element boundary = (Element) boundariesList.item(0);
+                String from = boundary.getAttribute("from");
+                String to = boundary.getAttribute("to");
+                FunctionRegistry.addRangeName(rangeName, from, to);
+            }
+
             // Initialize the sheet
             sheet = new Cell[rows][columns];
             FunctionRegistry.setSheet(this);
@@ -140,6 +149,15 @@ public class Sheet implements Serializable {
                 // Create the cell
                 sheet[row][colIndex] = new Cell(getCellName(row, colIndex), value, this);
             }
+
+            for (int i = 0; i < rows; i++) {
+                for (int j = 0; j < columns; j++) {
+                    if (sheet[i][j] == null) {
+                        sheet[i][j] = new Cell(getCellName(i, j), "", this);
+                    }
+                }
+            }
+
         } catch (Exception e) {
             throw new RuntimeException("Error creating sheet from file: " + filePath + "\n" + e.getMessage());
         }
@@ -152,17 +170,6 @@ public class Sheet implements Serializable {
         return cell != null ? cell.getEffectiveValue().toString() : null;
     }
 
-    public String[][] getTableValues() {
-        String[][] values = new String[rows][columns];
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < columns; j++) {
-                values[i][j] = sheet[i][j] != null ? sheet[i][j].getEffectiveValue().toString() : " ";
-            }
-        }
-
-        return values;
-    }
-
     public void setCell(String cellName, String value) {
         int[] indices = getCellIndices(cellName);
         if (sheet[indices[0]][indices[1]] == null) {
@@ -170,8 +177,6 @@ public class Sheet implements Serializable {
         } else {
             sheet[indices[0]][indices[1]].setValue(value);
         }
-
-        curNumberOfCellsChanged++;
     }
 
     Cell getCell(String cellName) {
@@ -207,8 +212,94 @@ public class Sheet implements Serializable {
         return dependencyGraph;
     }
 
+    public List<String> getDependentsNames(String cellName) {
+        List<String> names = new ArrayList<>();
+        int[] indices = getCellIndices(cellName);
+        Cell cell = sheet[indices[0]][indices[1]];
+        Set<Cell> dependents = dependencyGraph.getDependents(cell);
+        for (Cell dependent : dependents) {
+            names.add(dependent.getLocation());
+        }
+
+        return names;
+    }
+
+    public List<String> getDependentOn(String cellName) {
+        List<String> names = new ArrayList<>();
+        int[] indices = getCellIndices(cellName);
+        Cell cell = sheet[indices[0]][indices[1]];
+        Set<Cell> dependents = dependencyGraph.getDependencies(cell);
+        for (Cell dependent : dependents) {
+            names.add(dependent.getLocation());
+        }
+
+        return names;
+    }
+
     public CellDTO getCellData(String cellName) {
         int[] indices = getCellIndices(cellName);
+        if(sheet[indices[0]][indices[1]] == null) {
+            return null;
+        }
         return sheet[indices[0]][indices[1]].getCellData();
     }
+
+    public List<Object> resolveRange(String range) {
+        List<Object> values = new ArrayList<>();
+
+        // Parse the range into start and end coordinates
+        String[] parts = range.split(":");
+        if (parts.length != 2) {
+            throw new IllegalArgumentException("Invalid range format: " + range);
+        }
+
+        String start = parts[0];
+        String end = parts[1];
+
+        int startRow = getCellIndices(start)[0];
+        int startCol = getCellIndices(start)[1];
+        int endRow = getCellIndices(end)[0];
+        int endCol = getCellIndices(end)[1];
+        // Iterate through the range and collect cell values
+        for (int row = startRow; row <= endRow; row++) {
+            for (int col = startCol; col <= endCol; col++) {
+                Cell cell = sheet[row][col];
+                if (cell != null) {
+                    values.add(cell.getEffectiveValue());
+                }
+            }
+        }
+        return values;
+    }
+
+    public void loadFromVersion(SheetDTO version) {
+        // Restore the sheet structure
+        this.sheetName = version.getName();
+        this.rows = version.getVersionCells().length;
+        this.columns = version.getVersionCells()[0].length;
+        this.rowsHeight = version.getRowHeight();
+        this.columnWidth = version.getColumnWidth();
+
+        // Restore the cells
+        this.sheet = new Cell[rows][columns];
+        CellDTO[][] cellsDTO = version.getVersionCells();
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < columns; j++) {
+                if (cellsDTO[i][j] != null) {
+                    this.sheet[i][j] = new Cell(cellsDTO[i][j].getLocation(), cellsDTO[i][j].getOriginalValue(), this);
+                }
+            }
+        }
+
+        // Restore the dependency graph
+        this.dependencyGraph.clear();
+        for (Map.Entry<CellDTO, Set<CellDTO>> entry : version.getDependencies().entrySet()) {
+            Cell cell = this.getCell(entry.getKey().getLocation());
+            for (CellDTO dependentDTO : entry.getValue()) {
+                Cell dependentCell = this.getCell(dependentDTO.getLocation());
+                this.dependencyGraph.addDependency(cell, dependentCell);
+            }
+        }
+    }
+
 }

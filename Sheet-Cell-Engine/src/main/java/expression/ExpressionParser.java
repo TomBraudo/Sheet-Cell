@@ -48,16 +48,26 @@ public class ExpressionParser {
             case DIVIDE:
             case MOD:
             case CONCAT:
+            case PERCENT:
+            case OR:
+            case AND:
+            case EQUAL:
+            case BIGGER:
+            case LESS:
                 if (arguments.size() != 2) {
                     throw new IllegalArgumentException(type + " requires exactly 2 arguments.");
                 }
                 break;
             case SUB:
+            case IF:
                 if (arguments.size() != 3) {
                     throw new IllegalArgumentException("SUB requires exactly 3 arguments.");
                 }
                 break;
             case REF:
+            case SUM:
+            case AVERAGE:
+            case NOT:
                 if (arguments.size() != 1) {
                     throw new IllegalArgumentException("REF requires exactly 1 argument.");
                 }
@@ -94,22 +104,26 @@ public class ExpressionParser {
     }
 
     private static Object parseArgument(String arg) {
+        // Check for nested expressions
         if (arg.startsWith("{") && arg.endsWith("}")) {
             return parseExpression(arg); // Nested expression
         }
 
-        // Check if the argument is a cell reference in "A1" format
-        if (arg.matches("[A-Z]\\d+")) {
-            return arg; // Recognize column as letter and row as number
+        // Check for cell references or ranges
+        if (arg.matches("[A-Z]\\d+(?::[A-Z]\\d+)?")) {
+            return arg; // Return as-is for ranges or single cell references
         }
 
+        // Check for boolean values
+        if (arg.equalsIgnoreCase("TRUE") || arg.equalsIgnoreCase("FALSE")) {
+            return Boolean.parseBoolean(arg); // Convert to boolean
+        }
+
+        // Check for numeric arguments
         try {
             return Double.parseDouble(arg); // Numeric argument
         } catch (NumberFormatException e) {
             return arg; // Raw string
         }
     }
-
-
-
 }
