@@ -15,7 +15,11 @@ public class EngineOptions {
     private static Sheet curSheet = null;
 
     //Replacing the working sheet with another sheet created from an XML file
-    public void SetNewSheet(String filePath) { curSheet = new Sheet(filePath);}
+    public void setNewSheet(String filePath) { curSheet = new Sheet(filePath);}
+
+    public void setNewSheet(int rows, int columns, int rowHeight, int columnWidth) {
+        curSheet = new Sheet("New Sheet", rows, columns, rowHeight, columnWidth);
+    }
 
     //Method that returns a cellDTO to the UI from the location
     public CellDTO getCellData(String cellName) {

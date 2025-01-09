@@ -309,6 +309,9 @@ public class FunctionRegistry {
 
     public static void addRangeName(String rangeName, String from, String to) {
         String validRange = from + ":" + to;
+        if (rangeNameToRange.containsKey(rangeName)) {
+            throw new IllegalArgumentException("Duplicate range name: " + rangeName);
+        }
         rangeNameToRange.put(rangeName, validRange);
     }
 

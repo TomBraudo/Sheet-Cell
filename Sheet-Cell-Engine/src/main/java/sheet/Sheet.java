@@ -25,6 +25,36 @@ public class Sheet implements Serializable {
         createSheet(filePath);
         endEditingSession();
     }
+    public Sheet(String sheetName, int rows, int columns, int rowHeight, int columnWidth) {
+        if (rows < 1 || rows > 50) {
+            throw new IllegalArgumentException("Invalid number of rows: " + rows + ". Must be between 1 and 50.");
+        }
+        if (columns < 1 || columns > 20) {
+            throw new IllegalArgumentException("Invalid number of columns: " + columns + ". Must be between 1 and 20.");
+        }
+
+        this.sheetName = sheetName;
+        this.rows = rows;
+        this.columns = columns;
+        this.rowsHeight = rowHeight;
+        this.columnWidth = columnWidth;
+
+        // Initialize the blank sheet
+        this.sheet = new Cell[rows][columns];
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < columns; j++) {
+                String cellName = getCellName(i, j);
+                this.sheet[i][j] = new Cell(cellName, "", this);
+            }
+        }
+
+        // Clear dependency graph
+        dependencyGraph.clear();
+
+        // Add the initial version to the versions list
+        endEditingSession();
+    }
+
 
     public ArrayList<SheetDTO> getVersionsData() {
         return versions;
